@@ -1,2 +1,0 @@
-cd /Users/ryanhermes/Desktop/BIZTECH/myproject
-python manage.py runserver

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="../static/styles.css"> <!-- Link to your external CSS -->
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/signup">Sign Up</a></li>
+                <li><a href="/login">Log In</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form action="/login/" method="post"> <!-- Update the action URL as per your Django view -->
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p><a href="/register/">Register</a> | <a href="/forgot-password/">Forgot Password?</a></p>
+    </div>
+</body>
+</html>

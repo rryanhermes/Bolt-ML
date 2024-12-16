@@ -1,0 +1,18 @@
+
+Get going:
+
+cd /Users/ryanhermes/Desktop/BIZTECH/myproject
+python manage.py runserver
+
+
+
+Add a page:
+
+1. add a view function in views.py (both??)
+def testing(request):
+    return render(request, 'testing.html')
+
+2. add html file to templates
+
+3. add url pattern to urls.py (both??)
+path('testing/', views.testing, name='testing')
