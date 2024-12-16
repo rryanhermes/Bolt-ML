@@ -8,9 +8,19 @@
 </head>
 <body>
     <header>
-        <h1>Testing Page</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/signup">Sign Up</a></li>
+                <li><a href="/login">Log In</a></li>
+                <li><a href="/testing">Testing</a></li>
+                {% if username %}
+                    <li>Welcome, {{ username }}</li>
+                {% endif %}
+            </ul>
+        </nav>
     </header>
-
+    <h2>Testing</h2>
     <section>
         <p>This is a placeholder for the Testing page.</p>
         <p>You can use this space to test features or add additional content.</p>

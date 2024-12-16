@@ -9,4 +9,5 @@ urlpatterns = [
     path('auth/', include('myapp.urls')),  # Include your app's URLs
     path('testing/', views.testing, name='testing'),
     path('login/', views.login, name='login'),
+    path('upload-csv/', views.upload_csv, name='upload_csv'),
 ]

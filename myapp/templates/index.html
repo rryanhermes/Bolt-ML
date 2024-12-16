@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Upload</title>
     <link rel="stylesheet" href="../static/styles.css">
-    <title>My Beautiful Site</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <header>
@@ -13,14 +15,83 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="/signup">Sign Up</a></li>
                 <li><a href="/login">Log In</a></li>
+                <li><a href="/testing">Testing</a></li>
+                {% if username %}
+                    <li>Welcome, {{ username }}</li>
+                {% endif %}
             </ul>
         </nav>
     </header>
-    <main>
-        <h2>Content Goes Here!</h2>
-    </main>
-    <footer>
-        <p>&copy; 2024 My Site</p>
-    </footer>
+    <div id="drop-zone">Drag and drop a CSV file here</div>
+    <div id="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        $(document).ready(function() {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+            $('#drop-zone').on('dragover', function(event) {
+                event.preventDefault(); // Prevent default behavior
+                $(this).addClass('hover');
+            });
+
+            $('#drop-zone').on('dragleave', function(event) {
+                $(this).removeClass('hover');
+            });
+
+            $('#drop-zone').on('drop', function(event) {
+                event.preventDefault(); // Prevent default behavior
+                $(this).removeClass('hover');
+
+                var files = event.originalEvent.dataTransfer.files;
+                if (files.length) {
+                    var formData = new FormData();
+                    formData.append('file', files[0]);
+                    formData.append('csrfmiddlewaretoken', csrftoken); // Add CSRF token to the form data
+
+                    // Show the loading spinner
+                    $('#loading-spinner').show();
+
+                    $.ajax({
+                        url: '/upload-csv/',  // Adjust the URL as needed
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            $('#result').html(response.description);
+                            // Display the plots
+                            response.plots.forEach(function(plot) {
+                                $('#result').append(plot);
+                            });
+                            // Hide the loading spinner
+                            $('#loading-spinner').hide();
+                        },
+                        error: function() {
+                            $('#result').html('An error occurred while processing the file.');
+                            // Hide the loading spinner
+                            $('#loading-spinner').hide();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
