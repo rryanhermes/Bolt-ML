@@ -1,0 +1,105 @@
+/* General Reset */
+html, body, div, h1, h2, h3, h4, h5, h6, p, ul, li {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styles */
+body {
+    background-color: #121212;  /* Dark background */
+    color: #ffffff;              /* Light text color */
+    font-family: Arial, sans-serif;
+}
+
+/* Header Styles */
+header {
+    background-color: #1e1e1e;  /* Darker header */
+    padding: 20px;
+    text-align: center;
+}
+
+h1, h2, h3 {
+    color: #ffffff;
+}
+
+/* Link Styles */
+a {
+    color: #BB86FC;              /* Light purple for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Button Styles */
+button {
+    background-color: #BB86FC;   /* Button color */
+    color: #121212;              /* Button text color */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #3700B3;   /* Darker button on hover */
+}
+
+/* Section Styles */
+section {
+    padding: 20px;
+    margin: 20px;
+    background-color: #1e1e1e;  /* Section background */
+    border-radius: 10px;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #1e1e1e;  /* Footer background */
+    padding: 10px;
+    text-align: center;
+}
+
+/* List Styles */
+ul {
+    list-style-type: none;       /* Remove bullets */
+}
+
+/* Card Styles */
+.card {
+    background-color: #1e1e1e;  /* Card background */
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Navigation Bar Styles */
+nav {
+    background-color: #333;
+    overflow: hidden;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    float: left;
+}
+
+nav ul li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    background-color: #111;
+}
