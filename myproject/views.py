@@ -8,43 +8,77 @@ import plotly.express as px
 import plotly.io as pio
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+import time
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['file']:
         csv_file = request.FILES['file']
         try:
+            start_time = time.time()  # Start time
             df = pd.read_csv(csv_file)  # Load the CSV file into a DataFrame
-            description = df.describe()  # Get description
+            end_time = time.time()  # End time
+            loading_time = end_time - start_time  # Calculate loading time
+
+            head = df.head()  # Get description
+            length = df.shape[0]  # Get number of rows
+
+            print(f'Number of rows: {length}')
+            print(f'Loading time: {loading_time:.2f} seconds')
 
             # Generate the distribution grid
             plots = generate_distribution_grid(df)
 
             return JsonResponse({
-                'description': description.to_html(),
+                'description': head.to_html(),
+                'info': f'Number of rows: {length}',
+                'loading_time': f'Loading time: {loading_time:.2f} seconds',
                 'plots': plots
             }, safe=False)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-def generate_distribution_grid(df, num_cols=3):
+def generate_distribution_grid(df):
     numerical_columns = df.select_dtypes(include=['number']).columns
     categorical_columns = df.select_dtypes(exclude=['number']).columns
 
     plots = []
+    
+    # Prepare subplot layout
+    num_plots = len(numerical_columns) + len(categorical_columns)
+    rows = (num_plots // num_plots) + (num_plots % num_plots > 0)
+    fig = make_subplots(rows=rows, cols=num_plots, subplot_titles=[])
 
-    for column in numerical_columns:
-        fig = px.histogram(df, x=column, title=f'Histogram of {column}')
-        plots.append(pio.to_html(fig, full_html=False))
+    # Generate histograms for numerical columns
+    for i, column in enumerate(numerical_columns):
+        row = i // num_plots + 1
+        col = i % num_plots + 1
+        histogram_fig = px.histogram(df, x=column, title=f'Histogram of {column}', width=300, height=300)
+        for trace in histogram_fig.data:
+            fig.add_trace(trace, row=row, col=col)
 
-    for column in categorical_columns:
+    # Generate pie/bar charts for categorical columns
+    for i, column in enumerate(categorical_columns):
         category_counts = df[column].value_counts()
+        row = (len(numerical_columns) + i) // num_plots + 1
+        col = (len(numerical_columns) + i) % num_plots + 1
+        
         if len(category_counts) <= 20:
-            fig = px.pie(df, names=column, title=f'Pie Chart of {column}')
+            pie_fig = px.pie(df, names=category_counts.index, values=category_counts.values, title=f'Pie Chart of {column}')
+            for trace in pie_fig.data:
+                fig.add_trace(trace, row=row, col=col)
         else:
-            fig = px.bar(df, x=category_counts.index, y=category_counts.values, title=f'Bar Chart of {column}')
-        plots.append(pio.to_html(fig, full_html=False))
+            bar_fig = px.bar(x=category_counts.index, y=category_counts.values, title=f'Bar Chart of {column}')
+            for trace in bar_fig.data:
+                fig.add_trace(trace, row=row, col=col)
 
+    # Update layout for better spacing
+    fig.update_layout(height=300 * rows, width=300 * num_plots)
+    
+    plots.append(pio.to_html(fig, full_html=False))
+    
     return plots
 
 def login(request):
