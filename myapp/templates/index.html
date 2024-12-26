@@ -24,10 +24,46 @@
         </nav>
     </header>
     <div id="drop-zone">Drag and drop a CSV file here</div>
-    <div id="loading-spinner" style="display: none;">
-        <div class="spinner"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     </div>
     <div id="result"></div>
+    <div id="ml-form" style="display: none;">
+        <h3>Configure Machine Learning Model</h3>
+        <form id="ml-config">
+            <div class="form-group">
+                <label for="target-column">Target Column:</label>
+                <select id="target-column" name="target_column" required>
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="problem-type">Problem Type:</label>
+                <select id="problem-type" name="problem_type" required>
+                    <option value="classification">Classification</option>
+                    <option value="regression">Regression</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="file-format">File Format:</label>
+                <select id="file-format" name="file_format" required>
+                    <option value="pkl">Pickle (.pkl)</option>
+                    <option value="joblib">Joblib (.joblib)</option>
+                </select>
+            </div>
+            <button type="submit">Build Model</button>
+        </form>
+    </div>
+
+    <div id="download-section" style="display: none;">
+        <h3>Model Results:</h3>
+        <p id="model-accuracy"></p>
+        <button id="download-button" class="btn btn-primary">Download Model</button>
+    </div>
 
     <script>
         $(document).ready(function() {
@@ -81,6 +117,18 @@
                             response.plots.forEach(function(plot) {
                                 $('#result').append(plot);
                             });
+                            
+                            // Populate target column dropdown and show ML form
+                            const targetSelect = $('#target-column');
+                            targetSelect.empty();
+                            response.columns.forEach(function(column) {
+                                targetSelect.append($('<option>', {
+                                    value: column,
+                                    text: column
+                                }));
+                            });
+                            $('#ml-form').show();
+                            
                             // Hide the loading spinner
                             $('#loading-spinner').hide();
                         },
@@ -90,6 +138,75 @@
                             $('#loading-spinner').hide();
                         }
                     });
+                }
+            });
+
+            let modelBlob = null;
+            let modelFilename = null;
+
+            function showLoading() {
+                document.getElementById('loadingOverlay').style.display = 'block';
+            }
+
+            function hideLoading() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+
+            $('#ml-config').on('submit', function(e) {
+                e.preventDefault();
+                showLoading();
+                
+                const formData = {
+                    target_column: $('#target-column').val(),
+                    problem_type: $('#problem-type').val(),
+                    file_format: $('#file-format').val()
+                };
+
+                $.ajax({
+                    url: '/build-model/',
+                    type: 'POST',
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function(response, status, xhr) {
+                        // Store the blob and filename
+                        modelBlob = response;
+                        modelFilename = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                        const accuracy = xhr.getResponseHeader('X-Model-Accuracy');
+                        
+                        // Show results and download button
+                        $('#model-accuracy').text(`Model Accuracy: ${accuracy}`);
+                        $('#download-section').show();
+                        
+                        hideLoading();
+                    },
+                    error: function(xhr, status, error) {
+                        try {
+                            const errorMsg = JSON.parse(xhr.responseText).error;
+                            $('#result').append(`<p class="error">Error building model: ${errorMsg}</p>`);
+                        } catch {
+                            $('#result').append('<p class="error">Error building model</p>');
+                        }
+                        hideLoading();
+                    }
+                });
+            });
+
+            // Handle download button click
+            $('#download-button').on('click', function() {
+                if (modelBlob && modelFilename) {
+                    const url = window.URL.createObjectURL(modelBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', modelFilename);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
                 }
             });
         });

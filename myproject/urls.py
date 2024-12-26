@@ -10,4 +10,5 @@ urlpatterns = [
     path('testing/', views.testing, name='testing'),
     path('login/', views.login, name='login'),
     path('upload-csv/', views.upload_csv, name='upload_csv'),
+    path('build-model/', views.build_model, name='build_model'),
 ]
