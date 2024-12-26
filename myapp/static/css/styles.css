@@ -136,8 +136,10 @@ button:hover {
     border: 3px dashed rgba(187, 134, 252, 0.3);
     width: 100%;
     height: 200px;
-    text-align: center;
-    line-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     margin-bottom: 2rem;
     border-radius: 16px;
     transition: all 0.3s ease;
@@ -149,7 +151,25 @@ button:hover {
     background-color: rgba(187, 134, 252, 0.1);
 }
 
-/* Modern Loading Spinner Styles */
+#browse-button {
+    background: none;
+    border: none;
+    color: #BB86FC;
+    padding: 0;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+#browse-button:hover {
+    color: #9965e5;
+    text-decoration: underline;
+    transform: none;
+    background: none;
+    box-shadow: none;
+}
+
+/* Loading Overlay Styles */
 .loading-overlay {
     display: none;
     position: fixed;
@@ -157,31 +177,38 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(10, 10, 10, 0.8);
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 9999;
-}
-
-.loading-overlay.show {
-    display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.spinner-border {
-    width: 4rem;
-    height: 4rem;
-    border: 0.25rem solid #BB86FC;
-    border-right-color: transparent;
+.loading-overlay.show {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #BB86FC;
     border-radius: 50%;
-    animation: spinner-border 0.75s linear infinite;
-    text-indent: -9999px; /* Hide any text inside the spinner */
+    animation: spin 1s linear infinite;
 }
 
-@keyframes spinner-border {
-    to { transform: rotate(360deg); }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Remove the spinning text */
 .visually-hidden {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

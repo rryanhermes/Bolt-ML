@@ -1,13 +1,14 @@
 <!-- filepath: /Users/ryanhermes/Desktop/BIZTECH/myproject/myapp/templates/index.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV Upload</title>
-    <link rel="stylesheet" href="../static/styles.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -23,14 +24,17 @@
             </ul>
         </nav>
     </header>
-    <div id="drop-zone">Drag and drop a CSV file here</div>
+    <div id="drop-zone">
+        Drag and drop a CSV file here or
+        <button type="button" id="browse-button">browse files</button>
+    </div>
+    <input type="file" id="file-input" accept=".csv" style="display: none;">
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
+    
     <div id="result"></div>
     <div id="ml-form" style="display: none;">
         <h3>Configure Machine Learning Model</h3>
@@ -84,7 +88,7 @@
             const csrftoken = getCookie('csrftoken');
 
             $('#drop-zone').on('dragover', function(event) {
-                event.preventDefault(); // Prevent default behavior
+                event.preventDefault();
                 $(this).addClass('hover');
             });
 
@@ -92,52 +96,66 @@
                 $(this).removeClass('hover');
             });
 
+            $('#browse-button').on('click', function() {
+                $('#file-input').click();
+            });
+
+            function handleFileUpload(file) {
+                var formData = new FormData();
+                formData.append('file', file);
+                formData.append('csrfmiddlewaretoken', csrftoken);
+
+                // Show loading overlay before starting upload
+                $('#loadingOverlay').addClass('show');
+
+                $.ajax({
+                    url: '/upload-csv/',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    timeout: 10000,
+                    success: function(response) {
+                        // Hide loading overlay
+                        $('#loadingOverlay').removeClass('show');
+                        
+                        $('#result').html(response.description);
+                        response.plots.forEach(function(plot) {
+                            $('#result').append(plot);
+                        });
+                        
+                        const targetSelect = $('#target-column');
+                        targetSelect.empty();
+                        response.columns.forEach(function(column) {
+                            targetSelect.append($('<option>', {
+                                value: column,
+                                text: column
+                            }));
+                        });
+                        $('#ml-form').show();
+                    },
+                    error: function(xhr, status, error) {
+                        // Hide loading overlay
+                        $('#loadingOverlay').removeClass('show');
+                        $('#result').html('An error occurred while processing the file.');
+                    }
+                });
+            }
+
             $('#drop-zone').on('drop', function(event) {
-                event.preventDefault(); // Prevent default behavior
+                event.preventDefault();
                 $(this).removeClass('hover');
 
                 var files = event.originalEvent.dataTransfer.files;
                 if (files.length) {
-                    var formData = new FormData();
-                    formData.append('file', files[0]);
-                    formData.append('csrfmiddlewaretoken', csrftoken); // Add CSRF token to the form data
+                    handleFileUpload(files[0]);
+                }
+            });
 
-                    // Show the loading spinner
-                    $('#loading-spinner').show();
-
-                    $.ajax({
-                        url: '/upload-csv/',  // Adjust the URL as needed
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(response) {
-                            $('#result').html(response.description);
-                            // Display the plots
-                            response.plots.forEach(function(plot) {
-                                $('#result').append(plot);
-                            });
-                            
-                            // Populate target column dropdown and show ML form
-                            const targetSelect = $('#target-column');
-                            targetSelect.empty();
-                            response.columns.forEach(function(column) {
-                                targetSelect.append($('<option>', {
-                                    value: column,
-                                    text: column
-                                }));
-                            });
-                            $('#ml-form').show();
-                            
-                            // Hide the loading spinner
-                            $('#loading-spinner').hide();
-                        },
-                        error: function() {
-                            $('#result').html('An error occurred while processing the file.');
-                            // Hide the loading spinner
-                            $('#loading-spinner').hide();
-                        }
-                    });
+            $('#file-input').on('change', function(event) {
+                var files = event.target.files;
+                if (files.length) {
+                    handleFileUpload(files[0]);
                 }
             });
 
@@ -145,11 +163,11 @@
             let modelFilename = null;
 
             function showLoading() {
-                document.getElementById('loadingOverlay').style.display = 'block';
+                document.getElementById('loadingOverlay').classList.add('show');
             }
 
             function hideLoading() {
-                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('loadingOverlay').classList.remove('show');
             }
 
             $('#ml-config').on('submit', function(e) {
