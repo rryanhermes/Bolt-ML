@@ -41,45 +41,98 @@ def upload_csv(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def generate_distribution_grid(df):
-    numerical_columns = df.select_dtypes(include=['number']).columns
-    categorical_columns = df.select_dtypes(exclude=['number']).columns
-
-    plots = []
-    
-    # Prepare subplot layout
-    num_plots = len(numerical_columns) + len(categorical_columns)
-    rows = (num_plots // num_plots) + (num_plots % num_plots > 0)
-    fig = make_subplots(rows=rows, cols=num_plots, subplot_titles=[])
-
-    # Generate histograms for numerical columns
-    for i, column in enumerate(numerical_columns):
-        row = i // num_plots + 1
-        col = i % num_plots + 1
-        histogram_fig = px.histogram(df, x=column, title=f'Histogram of {column}', width=300, height=300)
-        for trace in histogram_fig.data:
-            fig.add_trace(trace, row=row, col=col)
-
-    # Generate pie/bar charts for categorical columns
-    for i, column in enumerate(categorical_columns):
-        category_counts = df[column].value_counts()
-        row = (len(numerical_columns) + i) // num_plots + 1
-        col = (len(numerical_columns) + i) % num_plots + 1
-        
-        if len(category_counts) <= 20:
-            pie_fig = px.pie(df, names=category_counts.index, values=category_counts.values, title=f'Pie Chart of {column}')
-            for trace in pie_fig.data:
-                fig.add_trace(trace, row=row, col=col)
+    # Initialize column types while maintaining order
+    column_types = {}
+    for col in df.columns:
+        if df[col].dtype in ['int64', 'float64']:
+            unique_vals = set(df[col].dropna().unique())
+            if unique_vals == {0, 1} or unique_vals == {0.0, 1.0}:
+                column_types[col] = 'binary'
+            else:
+                column_types[col] = 'numerical'
         else:
-            bar_fig = px.bar(x=category_counts.index, y=category_counts.values, title=f'Bar Chart of {column}')
-            for trace in bar_fig.data:
-                fig.add_trace(trace, row=row, col=col)
+            column_types[col] = 'categorical'
+    
+    num_cols = len(df.columns)
+    
+    # Create specs array - one row, many columns
+    specs = [[{"type": "xy" if column_types[col] == 'numerical' else "domain"} 
+             for col in df.columns]]
+    
+    fig = make_subplots(
+        rows=1,
+        cols=num_cols,
+        subplot_titles=df.columns,
+        specs=specs
+    )
 
-    # Update layout for better spacing
-    fig.update_layout(height=300 * rows, width=300 * num_plots)
+    # Create visualizations in original column order
+    for i, column in enumerate(df.columns):
+        col = i + 1  # plotly uses 1-based indexing
+        
+        if column_types[column] == 'numerical':
+            # Histogram for numerical columns
+            histogram_fig = px.histogram(df, x=column, 
+                                      color_discrete_sequence=["skyblue"],  
+                                      opacity=0.7)
+            for trace in histogram_fig.data:
+                fig.add_trace(trace, row=1, col=col)
+            fig.update_yaxes(title_text='Frequency', row=1, col=col)
+        
+        else:  # binary or categorical
+            category_counts = df[column].value_counts()
+            
+            if column_types[column] == 'binary':
+                # For binary columns, create custom labels
+                labels = ['False (0)', 'True (1)'] if len(category_counts) == 2 else \
+                        ['True (1)' if 1 in category_counts.index else 'False (0)']
+                values = [category_counts.get(0, 0), category_counts.get(1, 0)] if len(category_counts) == 2 else \
+                        [category_counts.iloc[0]]
+            else:
+                # For regular categorical columns
+                labels = category_counts.index
+                values = category_counts.values
+
+            if len(category_counts) <= 20:
+                try:
+                    fig.add_trace(go.Pie(
+                        labels=labels,
+                        values=values,
+                        hole=0.3,
+                        textinfo='label+percent',
+                        insidetextorientation='radial'
+                    ), row=1, col=col)
+                except ValueError as e:
+                    fig.add_annotation(
+                        xref='paper', yref='paper',
+                        x=(col - 0.5) / num_cols,
+                        y=0.5,
+                        text=f'{column}\nUnique Values: {len(category_counts)}',
+                        showarrow=False,
+                        font=dict(size=12)
+                    )
+            else:
+                fig.add_annotation(
+                    xref='paper', yref='paper',
+                    x=(col - 0.5) / num_cols,
+                    y=0.5,
+                    text=f'{column}\nUnique Values: {len(category_counts)}',
+                    showarrow=False,
+                    font=dict(size=12)
+                )
+
+    # Update layout
+    fig.update_layout(
+        title_text='',
+        title_x=0.5,
+        height=400,  # Fixed height since we only have one row
+        width=max(300 * num_cols, 1200),  # Scale width based on number of columns, minimum 1200px
+        showlegend=False,
+        margin=dict(t=100)  # Add more top margin for titles
+    )
     
-    plots.append(pio.to_html(fig, full_html=False))
-    
-    return plots
+    # Convert to HTML and return as a single element list to maintain compatibility
+    return [pio.to_html(fig, full_html=False)]
 
 def login(request):
     if request.method == 'POST':
