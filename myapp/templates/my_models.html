@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-color: #f7fafc !important;
+        min-height: 100vh;
+    }
+
+    .models-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        color: #2d3748 !important;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .models-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+    
+    .model-card {
+        background: white !important;
+        border-radius: 20px !important;
+        padding: 1.75rem !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+        border: 1px solid #e2e8f0 !important;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .model-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(to right, #4299e1, #667eea);
+    }
+    
+    .model-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .model-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #edf2f7;
+    }
+    
+    .model-header h3 {
+        margin: 0;
+        color: #1a202c !important;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    
+    .model-type {
+        padding: 0.35rem 1rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.025em;
+        display: inline-block;
+    }
+    
+    .model-type.classification {
+        background-color: #ebf8ff !important;
+        color: #2b6cb0 !important;
+        border: 1px solid #bee3f8;
+    }
+    
+    .model-type.regression {
+        background-color: #faf5ff !important;
+        color: #553c9a !important;
+        border: 1px solid #e9d8fd;
+    }
+    
+    .model-info {
+        margin: 1.25rem 0;
+        background: #f8fafc !important;
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        color: #1a202c !important;
+    }
+    
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .info-label {
+        color: #64748b !important;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: #1a202c !important;
+        font-weight: 500;
+    }
+    
+    .metrics {
+        background: #f1f5f9 !important;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin: 1.25rem 0;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .metric-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .metric-label {
+        color: #475569 !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    
+    .metric-value {
+        color: #0f172a !important;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+    
+    .download-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(to right, #4299e1, #667eea) !important;
+        color: white !important;
+        text-decoration: none !important;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+        outline: none;
+        margin-top: 1rem;
+    }
+    
+    .download-btn:hover {
+        background: linear-gradient(to right, #3182ce, #5a67d8) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        color: white !important;
+        text-decoration: none !important;
+    }
+    
+    .download-icon {
+        fill: currentColor;
+    }
+    
+    .no-models {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white !important;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+    
+    .empty-icon {
+        fill: #a0aec0;
+        margin-bottom: 1.5rem;
+        width: 64px;
+        height: 64px;
+    }
+    
+    .no-models p {
+        color: #4a5568 !important;
+        font-size: 1.2rem;
+        margin: 1rem 0 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .create-model-btn {
+        display: inline-block;
+        padding: 0.875rem 2rem;
+        background: linear-gradient(to right, #4299e1, #667eea) !important;
+        color: white !important;
+        text-decoration: none !important;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .create-model-btn:hover {
+        background: linear-gradient(to right, #3182ce, #5a67d8) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        color: white !important;
+        text-decoration: none !important;
+    }
+
+    .auth-required {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white !important;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+
+    .auth-icon {
+        fill: #a0aec0;
+        margin-bottom: 1.5rem;
+        width: 64px;
+        height: 64px;
+    }
+
+    .auth-message {
+        color: #4a5568;
+        font-size: 1.2rem;
+        margin: 1rem 0 1.5rem;
+        line-height: 1.6;
+    }
+
+    .auth-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .auth-btn {
+        display: inline-block;
+        padding: 0.875rem 2rem;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .login-btn {
+        background: linear-gradient(to right, #4299e1, #667eea);
+        color: white;
+    }
+
+    .signup-btn {
+        background: white;
+        color: #4299e1;
+        border: 2px solid #4299e1;
+    }
+
+    .auth-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .login-btn:hover {
+        background: linear-gradient(to right, #3182ce, #5a67d8);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+    }
+
+    .signup-btn:hover {
+        background: #f7fafc;
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="models-container">
+    <h2 class="page-title">My Models</h2>
+    {% if not_authenticated %}
+        <div class="auth-required">
+            <svg class="auth-icon" viewBox="0 0 24 24" width="48" height="48">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v14zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            </svg>
+            <p class="auth-message">You need to be logged in to view your models</p>
+            <div class="auth-buttons">
+                <a href="{% url 'login' %}" class="auth-btn login-btn">Log In</a>
+                <a href="{% url 'signup' %}" class="auth-btn signup-btn">Sign Up</a>
+            </div>
+        </div>
+    {% elif models %}
+        <div class="models-grid">
+            {% for model in models %}
+            <div class="model-card">
+                <div class="model-header">
+                    <h3>{{ model.name }}</h3>
+                    <span class="model-type {% if model.model_type == 'classification' %}classification{% else %}regression{% endif %}">
+                        {{ model.model_type }}
+                    </span>
+                </div>
+                <div class="model-info">
+                    <div class="info-row">
+                        <span class="info-label">Created:</span>
+                        <span class="info-value">{{ model.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Target:</span>
+                        <span class="info-value">{{ model.metrics.target_column }}</span>
+                    </div>
+                </div>
+                {% if model.metrics %}
+                <div class="metrics">
+                    <div class="metric-item">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value">{{ model.metrics.accuracy|floatformat:3 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                <a href="{{ model.file_path }}" class="download-btn" download>
+                    <svg class="download-icon" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download Model
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-models">
+            <svg class="empty-icon" viewBox="0 0 24 24" width="48" height="48">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+            </svg>
+            <p>You haven't created any models yet</p>
+            <a href="{% url 'index' %}" class="create-model-btn">Create Your First Model</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,29 +1,7 @@
-<!-- filepath: /Users/ryanhermes/Desktop/BIZTECH/myproject/myapp/templates/index.html -->
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Upload</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/signup">Sign Up</a></li>
-                <li><a href="/login">Log In</a></li>
-                <li><a href="/testing">Testing</a></li>
-                {% if username %}
-                    <li>Welcome, {{ username }}</li>
-                {% endif %}
-            </ul>
-        </nav>
-    </header>
+
+{% block content %}
     <div id="drop-zone">
         Drag and drop a CSV file here or
         <button type="button" id="browse-button">browse files</button>
@@ -68,166 +46,161 @@
         <p id="model-accuracy"></p>
         <button id="download-button" class="btn btn-primary">Download Model</button>
     </div>
+{% endblock %}
 
-    <script>
-        $(document).ready(function() {
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
                     }
                 }
-                return cookieValue;
             }
-            const csrftoken = getCookie('csrftoken');
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
 
-            $('#drop-zone').on('dragover', function(event) {
-                event.preventDefault();
-                $(this).addClass('hover');
-            });
+        $('#drop-zone').on('dragover', function(event) {
+            event.preventDefault();
+            $(this).addClass('hover');
+        });
 
-            $('#drop-zone').on('dragleave', function(event) {
-                $(this).removeClass('hover');
-            });
+        $('#drop-zone').on('dragleave', function(event) {
+            $(this).removeClass('hover');
+        });
 
-            $('#browse-button').on('click', function() {
-                $('#file-input').click();
-            });
+        $('#browse-button').on('click', function() {
+            $('#file-input').click();
+        });
 
-            function handleFileUpload(file) {
-                var formData = new FormData();
-                formData.append('file', file);
-                formData.append('csrfmiddlewaretoken', csrftoken);
+        function handleFileUpload(file) {
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('csrfmiddlewaretoken', csrftoken);
 
-                // Show loading overlay before starting upload
-                $('#loadingOverlay').addClass('show');
+            $('#loadingOverlay').addClass('show');
 
-                $.ajax({
-                    url: '/upload-csv/',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    timeout: 10000,
-                    success: function(response) {
-                        // Hide loading overlay
-                        $('#loadingOverlay').removeClass('show');
-                        
-                        $('#result').html(response.description);
-                        response.plots.forEach(function(plot) {
-                            $('#result').append(plot);
-                        });
-                        
-                        const targetSelect = $('#target-column');
-                        targetSelect.empty();
-                        response.columns.forEach(function(column) {
-                            targetSelect.append($('<option>', {
-                                value: column,
-                                text: column
-                            }));
-                        });
-                        $('#ml-form').show();
-                    },
-                    error: function(xhr, status, error) {
-                        // Hide loading overlay
-                        $('#loadingOverlay').removeClass('show');
-                        $('#result').html('An error occurred while processing the file.');
-                    }
-                });
-            }
-
-            $('#drop-zone').on('drop', function(event) {
-                event.preventDefault();
-                $(this).removeClass('hover');
-
-                var files = event.originalEvent.dataTransfer.files;
-                if (files.length) {
-                    handleFileUpload(files[0]);
+            $.ajax({
+                url: '/upload-csv/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                timeout: 10000,
+                success: function(response) {
+                    $('#loadingOverlay').removeClass('show');
+                    
+                    $('#result').html(response.description);
+                    response.plots.forEach(function(plot) {
+                        $('#result').append(plot);
+                    });
+                    
+                    const targetSelect = $('#target-column');
+                    targetSelect.empty();
+                    response.columns.forEach(function(column) {
+                        targetSelect.append($('<option>', {
+                            value: column,
+                            text: column
+                        }));
+                    });
+                    $('#ml-form').show();
+                },
+                error: function(xhr, status, error) {
+                    $('#loadingOverlay').removeClass('show');
+                    $('#result').html('An error occurred while processing the file.');
                 }
             });
+        }
 
-            $('#file-input').on('change', function(event) {
-                var files = event.target.files;
-                if (files.length) {
-                    handleFileUpload(files[0]);
-                }
-            });
+        $('#drop-zone').on('drop', function(event) {
+            event.preventDefault();
+            $(this).removeClass('hover');
 
-            let modelBlob = null;
-            let modelFilename = null;
-
-            function showLoading() {
-                document.getElementById('loadingOverlay').classList.add('show');
+            var files = event.originalEvent.dataTransfer.files;
+            if (files.length) {
+                handleFileUpload(files[0]);
             }
+        });
 
-            function hideLoading() {
-                document.getElementById('loadingOverlay').classList.remove('show');
+        $('#file-input').on('change', function(event) {
+            var files = event.target.files;
+            if (files.length) {
+                handleFileUpload(files[0]);
             }
+        });
 
-            $('#ml-config').on('submit', function(e) {
-                e.preventDefault();
-                showLoading();
-                
-                const formData = {
-                    target_column: $('#target-column').val(),
-                    problem_type: $('#problem-type').val(),
-                    file_format: $('#file-format').val()
-                };
+        let modelBlob = null;
+        let modelFilename = null;
 
-                $.ajax({
-                    url: '/build-model/',
-                    type: 'POST',
-                    data: JSON.stringify(formData),
-                    contentType: 'application/json',
-                    headers: {
-                        'X-CSRFToken': csrftoken
-                    },
-                    xhrFields: {
-                        responseType: 'blob'
-                    },
-                    success: function(response, status, xhr) {
-                        // Store the blob and filename
-                        modelBlob = response;
-                        modelFilename = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].replace(/"/g, '');
-                        const accuracy = xhr.getResponseHeader('X-Model-Accuracy');
-                        
-                        // Show results and download button
-                        $('#model-accuracy').text(`Model Accuracy: ${accuracy}`);
-                        $('#download-section').show();
-                        
-                        hideLoading();
-                    },
-                    error: function(xhr, status, error) {
-                        try {
-                            const errorMsg = JSON.parse(xhr.responseText).error;
-                            $('#result').append(`<p class="error">Error building model: ${errorMsg}</p>`);
-                        } catch {
-                            $('#result').append('<p class="error">Error building model</p>');
-                        }
-                        hideLoading();
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        $('#ml-config').on('submit', function(e) {
+            e.preventDefault();
+            showLoading();
+            
+            const formData = {
+                target_column: $('#target-column').val(),
+                problem_type: $('#problem-type').val(),
+                file_format: $('#file-format').val()
+            };
+
+            $.ajax({
+                url: '/build-model/',
+                type: 'POST',
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(response, status, xhr) {
+                    modelBlob = response;
+                    modelFilename = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                    const accuracy = xhr.getResponseHeader('X-Model-Accuracy');
+                    
+                    $('#model-accuracy').text(`Model Accuracy: ${accuracy}`);
+                    $('#download-section').show();
+                    
+                    hideLoading();
+                },
+                error: function(xhr, status, error) {
+                    try {
+                        const errorMsg = JSON.parse(xhr.responseText).error;
+                        $('#result').append(`<p class="error">Error building model: ${errorMsg}</p>`);
+                    } catch {
+                        $('#result').append('<p class="error">Error building model</p>');
                     }
-                });
-            });
-
-            // Handle download button click
-            $('#download-button').on('click', function() {
-                if (modelBlob && modelFilename) {
-                    const url = window.URL.createObjectURL(modelBlob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', modelFilename);
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
+                    hideLoading();
                 }
             });
         });
-    </script>
-</body>
-</html>
+
+        $('#download-button').on('click', function() {
+            if (modelBlob && modelFilename) {
+                const url = window.URL.createObjectURL(modelBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', modelFilename);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            }
+        });
+    });
+</script>
+{% endblock %}

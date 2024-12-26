@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    .account-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .account-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .account-title {
+        font-size: 2rem;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .username {
+        font-size: 1.2rem;
+        color: #4a5568;
+    }
+
+    .account-info {
+        margin-bottom: 2rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        border-radius: 12px;
+        background: #f8fafc;
+        margin-bottom: 1rem;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #1a202c;
+        font-weight: 500;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(to right, #ef4444, #dc2626);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .logout-btn:hover {
+        background: linear-gradient(to right, #dc2626, #b91c1c);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <div class="account-header">
+        <h2 class="account-title">My Account</h2>
+        <div class="username">{{ request.user.username }}</div>
+    </div>
+
+    <div class="account-info">
+        <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ request.user.email }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Member Since</span>
+            <span class="info-value">{{ request.user.date_joined|date:"M d, Y" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Total Models</span>
+            <span class="info-value">{{ total_models }}</span>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn">Log Out</button>
+    </form>
+</div>
+{% endblock %} 

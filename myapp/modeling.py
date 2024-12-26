@@ -48,11 +48,8 @@ def train_model(X, y, problem_type):
         model = RandomForestRegressor(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Get R² score as accuracy
+        # Get R² score as accuracy for regression
         y_pred = model.predict(X_test)
         accuracy = r2_score(y_test, y_pred)
-    
-    else:
-        raise ValueError(f"Unsupported problem type: {problem_type}")
     
     return model, accuracy 
