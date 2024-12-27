@@ -77,8 +77,9 @@ def upload_csv(request):
         request.session['original_data'] = df.to_json()
         request.session['columns'] = list(df.columns)
         
-        # Transform the data
-        transformed_df = transform(df)
+        # Transform the data without encoding the target column yet
+        # We'll handle the target column encoding during model building
+        transformed_df = transform(df)  # No target column specified during upload
         request.session['transformed_data'] = transformed_df.to_json()
         
         # Return column names and basic statistics
@@ -106,17 +107,22 @@ def build_model(request):
         
         print(f"Building model for user {request.user.username}")  # Debug log
         
-        # Get the data from session
-        transformed_data = request.session.get('transformed_data')
-        if not transformed_data:
-            print("No transformed data found in session")  # Debug log
+        # Get the original data from session
+        original_data = request.session.get('original_data')
+        if not original_data:
+            print("No data found in session")  # Debug log
             return JsonResponse({'error': 'No data found. Please upload a CSV file first.'}, status=400)
         
-        df = pd.read_json(transformed_data)
+        # Read the original data and transform it with the target column
+        df = pd.read_json(original_data)
+        transformed_df = transform(df, target_column)
+        
+        # Debug logging for available columns
+        print(f"Available columns in dataset: {list(transformed_df.columns)}")
         
         # Prepare features and target
-        X = df.drop(columns=[target_column])
-        y = df[target_column]
+        X = transformed_df.drop(columns=[target_column])
+        y = df[target_column]  # Use original target values from df
         
         print(f"Training model with target column: {target_column}")  # Debug log
         
@@ -134,7 +140,7 @@ def build_model(request):
         
         print(f"Saving model to: {file_path}")  # Debug log
         
-        # Save the model file
+        # Save the wrapped model file (includes label encoder if present)
         if file_format == 'pkl':
             with open(file_path, 'wb') as f:
                 pickle.dump(model, f)
@@ -181,3 +187,40 @@ def logout(request):
         auth_logout(request)
         return redirect('login')
     return redirect('index')
+
+@login_required
+def delete_model(request, model_id):
+    try:
+        model = UserModel.objects.get(id=model_id, user=request.user)
+        
+        # Delete the actual model file
+        file_path = os.path.join(settings.MEDIA_ROOT, model.file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
+        # Delete the database entry
+        model.delete()
+        return JsonResponse({'success': True})
+    except UserModel.DoesNotExist:
+        return JsonResponse({'error': 'Model not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def rename_model(request, model_id):
+    try:
+        data = json.loads(request.body)
+        new_name = data.get('new_name')
+        
+        if not new_name:
+            return JsonResponse({'error': 'New name is required'}, status=400)
+        
+        model = UserModel.objects.get(id=model_id, user=request.user)
+        model.name = new_name
+        model.save()
+        
+        return JsonResponse({'success': True, 'new_name': new_name})
+    except UserModel.DoesNotExist:
+        return JsonResponse({'error': 'Model not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

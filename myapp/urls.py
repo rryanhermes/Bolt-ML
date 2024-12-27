@@ -10,4 +10,6 @@ urlpatterns = [
     path('my-account/', views.my_account, name='my_account'),
     path('build-model/', views.build_model, name='build_model'),
     path('upload-csv/', views.upload_csv, name='upload_csv'),
+    path('delete-model/<int:model_id>/', views.delete_model, name='delete_model'),
+    path('rename-model/<int:model_id>/', views.rename_model, name='rename_model'),
 ]
