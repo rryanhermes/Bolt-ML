@@ -16,7 +16,7 @@
     
     .page-title {
         font-size: 2rem;
-        color: #2d3748 !important;
+        color: #ffffff !important;
         margin-bottom: 2rem;
         font-weight: 600;
         text-align: center;
@@ -310,17 +310,18 @@
             <div class="model-card">
                 <div class="model-header">
                     <h3>{{ model.name }}</h3>
-                    <span class="model-type {% if model.model_type == 'classification' %}classification{% else %}regression{% endif %}">
-                        {{ model.model_type }}
-                    </span>
                 </div>
                 <div class="model-info">
                     <div class="info-row">
-                        <span class="info-label">Created:</span>
-                        <span class="info-value">{{ model.created_at|date:"M d, Y" }}</span>
+                        <span class="info-label">Created</span>
+                        <span class="info-value">{{ model.created_at|date:"M d, Y g:i A" }}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Target:</span>
+                        <span class="info-label">Type</span>
+                        <span class="info-value">{{ model.model_type|title }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Target</span>
                         <span class="info-value">{{ model.metrics.target_column }}</span>
                     </div>
                 </div>

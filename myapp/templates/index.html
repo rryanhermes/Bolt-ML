@@ -1,51 +1,188 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+<style>
+    .upload-section {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .drop-zone {
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        background: var(--surface);
+        transition: all 0.2s;
+        cursor: pointer;
+        margin-bottom: 2rem;
+    }
+
+    .drop-zone.hover {
+        border-color: var(--primary);
+        background: var(--background);
+    }
+
+    .drop-zone-text {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .browse-btn {
+        color: var(--primary);
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .loading-overlay.show {
+        display: flex;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--background);
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .result-section {
+        margin-bottom: 3rem;
+    }
+
+    .data-preview {
+        overflow-x: auto;
+        background: var(--surface);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .data-preview table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-preview th,
+    .data-preview td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .data-preview th {
+        background: var(--background);
+        font-weight: 600;
+    }
+
+    .model-config {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .model-config h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        color: var(--text);
+        text-align: center;
+    }
+
+    .download-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .accuracy-display {
+        font-size: 1.2rem;
+        color: var(--text);
+        margin-bottom: 1rem;
+    }
+
+    .accuracy-value {
+        font-weight: 600;
+        color: var(--primary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <div id="drop-zone">
-        Drag and drop a CSV file here or
-        <button type="button" id="browse-button">browse files</button>
+<div class="upload-section">
+    <h2 class="page-title">Build Your Machine Learning Model</h2>
+    <div id="drop-zone" class="drop-zone">
+        <p class="drop-zone-text">
+            Drag and drop your CSV file here or 
+            <span class="browse-btn" id="browse-button">browse files</span>
+        </p>
     </div>
     <input type="file" id="file-input" accept=".csv" style="display: none;">
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="result-section">
+    <div id="result" class="data-preview"></div>
     
-    <div id="result"></div>
-    <div id="ml-form" style="display: none;">
-        <h3>Configure Machine Learning Model</h3>
+    <div id="ml-form" class="model-config" style="display: none;">
+        <h3>Configure Your Model</h3>
         <form id="ml-config">
             <div class="form-group">
-                <label for="target-column">Target Column:</label>
-                <select id="target-column" name="target_column" required>
+                <label class="form-label" for="target-column">Target Column</label>
+                <select id="target-column" name="target_column" class="form-control" required>
                     <!-- Will be populated dynamically -->
                 </select>
             </div>
             <div class="form-group">
-                <label for="problem-type">Problem Type:</label>
-                <select id="problem-type" name="problem_type" required>
+                <label class="form-label" for="problem-type">Problem Type</label>
+                <select id="problem-type" name="problem_type" class="form-control" required>
                     <option value="classification">Classification</option>
                     <option value="regression">Regression</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="file-format">File Format:</label>
-                <select id="file-format" name="file_format" required>
+                <label class="form-label" for="file-format">File Format</label>
+                <select id="file-format" name="file_format" class="form-control" required>
                     <option value="pkl">Pickle (.pkl)</option>
                     <option value="joblib">Joblib (.joblib)</option>
                 </select>
             </div>
-            <button type="submit">Build Model</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Build Model</button>
         </form>
     </div>
 
-    <div id="download-section" style="display: none;">
-        <h3>Model Results:</h3>
-        <p id="model-accuracy"></p>
-        <button id="download-button" class="btn btn-primary">Download Model</button>
+    <div id="download-section" class="download-section" style="display: none;">
+        <p class="accuracy-display">Model Accuracy: <span id="model-accuracy" class="accuracy-value"></span></p>
+        <button id="download-button" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 0.5rem;">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            Download Model
+        </button>
     </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -96,6 +233,8 @@
                 timeout: 10000,
                 success: function(response) {
                     $('#loadingOverlay').removeClass('show');
+                    
+                    console.log('Available columns:', response.columns);
                     
                     $('#result').html(response.description);
                     response.plots.forEach(function(plot) {
