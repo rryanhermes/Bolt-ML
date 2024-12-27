@@ -1,2 +1,3 @@
 models/usedcarprices model.joblib
 models/usedcarprices model.pkl
+db.sqlite3
