@@ -286,9 +286,8 @@
             document.getElementById('loadingOverlay').classList.remove('show');
         }
 
-        $('#ml-config').on('submit', function(e) {
-            e.preventDefault();
-            showLoading();
+        $('#ml-config').on('submit', function(event) {
+            event.preventDefault();
             
             const formData = {
                 target_column: $('#target-column').val(),
@@ -296,36 +295,38 @@
                 file_format: $('#file-format').val()
             };
 
-            $.ajax({
-                url: '/build-model/',
-                type: 'POST',
-                data: JSON.stringify(formData),
-                contentType: 'application/json',
+            $('#loadingOverlay').addClass('show');
+
+            fetch('/build-model-api/', {
+                method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrftoken
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
-                xhrFields: {
-                    responseType: 'blob'
-                },
-                success: function(response, status, xhr) {
-                    modelBlob = response;
-                    modelFilename = xhr.getResponseHeader('Content-Disposition').split('filename=')[1].replace(/"/g, '');
-                    const accuracy = xhr.getResponseHeader('X-Model-Accuracy');
-                    
-                    $('#model-accuracy').text(`Model Accuracy: ${accuracy}`);
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                const accuracy = response.headers.get('X-Model-Accuracy');
+                if (accuracy) {
+                    $('#model-accuracy').text((parseFloat(accuracy) * 100).toFixed(2) + '%');
                     $('#download-section').show();
-                    
-                    hideLoading();
-                },
-                error: function(xhr, status, error) {
-                    try {
-                        const errorMsg = JSON.parse(xhr.responseText).error;
-                        $('#result').append(`<p class="error">Error building model: ${errorMsg}</p>`);
-                    } catch {
-                        $('#result').append('<p class="error">Error building model</p>');
-                    }
-                    hideLoading();
                 }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `model_${formData.target_column}_${formData.problem_type}.${formData.file_format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                $('#loadingOverlay').removeClass('show');
+            })
+            .catch(error => {
+                $('#loadingOverlay').removeClass('show');
+                alert('Error building model: ' + error);
             });
         });
 

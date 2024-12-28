@@ -53,8 +53,22 @@ def my_models(request):
     
     models = UserModel.objects.filter(user=request.user)
     print(f"Found {models.count()} models for user {request.user.username}")  # Debug log
+    
+    # Add file size information to each model
     for model in models:
-        print(f"Model: {model.name}, Type: {model.model_type}, Metrics: {model.metrics}")  # Debug log
+        file_path = os.path.join(settings.MEDIA_ROOT, model.file_path)
+        try:
+            size_bytes = os.path.getsize(file_path)
+            # Convert to appropriate unit
+            if size_bytes < 1024:
+                model.file_size = f"{size_bytes} B"
+            elif size_bytes < 1024 * 1024:
+                model.file_size = f"{size_bytes/1024:.1f} KB"
+            else:
+                model.file_size = f"{size_bytes/(1024*1024):.1f} MB"
+        except (OSError, FileNotFoundError):
+            model.file_size = "Unknown"
+    
     return render(request, 'my_models.html', {
         'models': models,
         'username': request.user.username
@@ -224,3 +238,11 @@ def rename_model(request, model_id):
         return JsonResponse({'error': 'Model not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+def home(request):
+    context = {'username': request.user.username} if request.user.is_authenticated else {}
+    return render(request, 'home.html', context)
+
+def build_model_page(request):
+    context = {'username': request.user.username} if request.user.is_authenticated else {}
+    return render(request, 'build_model.html', context)

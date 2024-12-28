@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ML Model Builder{% endblock %}</title>
+    <title>{% block title %}BoltML{% endblock %}</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'BoltML.png' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -205,9 +206,15 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{% url 'index' %}" class="nav-brand">ML Model Builder</a>
+            <div style="display: flex; align-items: center;">
+                <a href="{% url 'index' %}" style="display: flex; align-items: center; text-decoration: none;">
+                    <img src="{% static 'BoltML.png' %}" alt="BoltML" class="nav-logo" style="width: 32px; height: auto; margin-right: 8px;">
+                    <span class="nav-brand">BoltML</span>
+                </a>
+            </div>
             <ul class="nav-links">
-                <li><a href="{% url 'index' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Build Model</a></li>
+                <li><a href="{% url 'index' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
+                <li><a href="{% url 'build_model' %}" class="nav-link {% if 'build-model' in request.path %}active{% endif %}">Build Model</a></li>
                 {% if request.user.is_authenticated %}
                     <li><a href="{% url 'my_models' %}" class="nav-link {% if 'my-models' in request.path %}active{% endif %}">My Models</a></li>
                     <li><a href="{% url 'my_account' %}" class="nav-link {% if 'my-account' in request.path %}active{% endif %}">My Account</a></li>

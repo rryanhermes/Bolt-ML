@@ -30,7 +30,7 @@ header {
 header h1 {
     margin: 0;
     font-size: clamp(2rem, 5vw, 3rem);
-    color: #BB86FC;
+    color: #fcb386;
     font-weight: 800;
     letter-spacing: -0.03em;
 }
@@ -81,7 +81,7 @@ main {
 }
 
 h2 {
-    color: #BB86FC;
+    color: #fcb986;
     margin-bottom: 1.5rem;
     font-weight: 700;
     font-size: clamp(1.5rem, 3vw, 2rem);
@@ -108,13 +108,13 @@ input, select {
 
 input:focus, select:focus {
     outline: none;
-    border-color: #BB86FC;
+    border-color: #fcb986;
     box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2);
 }
 
 /* Modern Button Styles */
 button {
-    background-color: #BB86FC;
+    background-color: #fcb986;
     color: #121212;
     border: none;
     padding: 0.8rem 1.6rem;
@@ -126,7 +126,7 @@ button {
 }
 
 button:hover {
-    background-color: #9965e5;
+    background-color: #fcb986;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(187, 134, 252, 0.3);
 }
@@ -147,14 +147,14 @@ button:hover {
 }
 
 #drop-zone:hover {
-    border-color: rgba(187, 134, 252, 0.6);
+    border-color: #fcb986;
     background-color: rgba(187, 134, 252, 0.1);
 }
 
 #browse-button {
     background: none;
     border: none;
-    color: #BB86FC;
+    color: #fcb986;
     padding: 0;
     font-weight: 600;
     cursor: pointer;
@@ -162,7 +162,7 @@ button:hover {
 }
 
 #browse-button:hover {
-    color: #9965e5;
+    color: #fcb986;
     text-decoration: underline;
     transform: none;
     background: none;
@@ -179,19 +179,19 @@ button:hover {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 9999;
-    justify-content: center;
-    align-items: center;
 }
 
 .loading-overlay.show {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .loading-spinner {
     width: 50px;
     height: 50px;
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #BB86FC;
+    border-top: 5px solid #fcb986;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
