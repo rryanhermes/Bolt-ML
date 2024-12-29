@@ -16,23 +16,30 @@
         transition: all 0.2s;
         cursor: pointer;
         margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .drop-zone.hover {
+    .drop-zone:hover {
         border-color: var(--primary);
         background: var(--background);
+    }
+
+    .drop-zone-content {
+        text-align: center;
     }
 
     .drop-zone-text {
         font-size: 1.1rem;
         color: var(--text-secondary);
-        margin-bottom: 1rem;
+        margin-bottom: 0;
     }
 
     .browse-btn {
         color: var(--primary);
         text-decoration: underline;
-        cursor: pointer;
+        display: inline;
     }
 
     .loading-overlay {
@@ -73,7 +80,6 @@
     .data-preview {
         overflow-x: auto;
         background: var(--surface);
-        border-radius: 16px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         margin-bottom: 2rem;
     }
@@ -125,16 +131,18 @@
         color: var(--primary);
     }
 </style>
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="upload-section">
     <h2 class="page-title">Build Your Machine Learning Model</h2>
     <div id="drop-zone" class="drop-zone">
-        <p class="drop-zone-text">
-            Drag and drop your CSV file here or 
-            <span class="browse-btn" id="browse-button">browse files</span>
-        </p>
+        <div class="drop-zone-content">
+            <p class="drop-zone-text">
+                Drag and drop your CSV file here or browse files
+            </p>
+        </div>
     </div>
     <input type="file" id="file-input" accept=".csv" style="display: none;">
 </div>
@@ -213,7 +221,11 @@
             $(this).removeClass('hover');
         });
 
-        $('#browse-button').on('click', function() {
+        $('#drop-zone').on('click', function(event) {
+            // Prevent click event if user is selecting text
+            if (window.getSelection().toString()) {
+                return;
+            }
             $('#file-input').click();
         });
 
@@ -314,14 +326,8 @@
                 return response.blob();
             })
             .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = `model_${formData.target_column}_${formData.problem_type}.${formData.file_format}`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
+                modelBlob = blob;
+                modelFilename = `model_${formData.target_column}_${formData.problem_type}.${formData.file_format}`;
                 $('#loadingOverlay').removeClass('show');
             })
             .catch(error => {
@@ -333,12 +339,14 @@
         $('#download-button').on('click', function() {
             if (modelBlob && modelFilename) {
                 const url = window.URL.createObjectURL(modelBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', modelFilename);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = modelFilename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
             }
         });
     });

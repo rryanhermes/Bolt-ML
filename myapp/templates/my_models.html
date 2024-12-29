@@ -4,7 +4,7 @@
 {% block extra_head %}
 <style>
     body {
-        background-color: #f7fafc !important;
+        background-color: var(--background) !important;
         min-height: 100vh;
     }
 
@@ -16,7 +16,7 @@
     
     .page-title {
         font-size: 2rem;
-        color: #ffffff !important;
+        color: var(--text) !important;
         margin-bottom: 2rem;
         font-weight: 600;
         text-align: center;
@@ -30,13 +30,13 @@
     }
     
     .model-card {
-        background: white !important;
+        background: var(--surface) !important;
         border-radius: 20px !important;
         padding: 1.75rem !important;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
-                    0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 4px 6px var(--shadow),
+                    0 10px 15px -3px var(--shadow-hover) !important;
         transition: transform 0.2s, box-shadow 0.2s !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid var(--border) !important;
         position: relative;
         overflow: hidden;
         margin-bottom: 2rem;
@@ -49,7 +49,7 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(to right, #4299e1, #667eea);
+        background: linear-gradient(to right, var(--primary), var(--secondary));
     }
     
     .model-card:hover {
@@ -106,7 +106,7 @@
         justify-content: space-between;
         margin-bottom: 0.75rem;
         font-size: 0.9rem;
-        color: #1a202c !important;
+        color: var(--text) !important;
     }
     
     .info-row:last-child {
@@ -114,21 +114,21 @@
     }
     
     .info-label {
-        color: #64748b !important;
+        color: var(--text-secondary) !important;
         font-weight: 500;
     }
     
     .info-value {
-        color: #1a202c !important;
+        color: var(--text) !important;
         font-weight: 500;
     }
     
     .metrics {
-        background: #f1f5f9 !important;
+        background: var(--background) !important;
         border-radius: 12px;
         padding: 1.25rem;
         margin: 1.25rem 0;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border);
     }
     
     .metric-item {
@@ -138,13 +138,13 @@
     }
     
     .metric-label {
-        color: #475569 !important;
+        color: var(--text-secondary) !important;
         font-weight: 500;
         font-size: 0.95rem;
     }
     
     .metric-value {
-        color: #0f172a !important;
+        color: var(--text) !important;
         font-weight: 600;
         font-size: 1.25rem;
     }
@@ -156,8 +156,8 @@
         gap: 0.5rem;
         width: 100%;
         padding: 0.875rem;
-        background: linear-gradient(to right, #4299e1, #667eea) !important;
-        color: white !important;
+        background: linear-gradient(to right, var(--primary), var(--secondary)) !important;
+        color: var(--surface) !important;
         text-decoration: none !important;
         border-radius: 12px;
         font-weight: 500;
@@ -168,10 +168,10 @@
     }
     
     .download-btn:hover {
-        background: linear-gradient(to right, #3182ce, #5a67d8) !important;
+        background: linear-gradient(to right, var(--primary-dark), var(--secondary-dark)) !important;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-        color: white !important;
+        box-shadow: 0 4px 12px var(--shadow-hover);
+        color: var(--surface) !important;
         text-decoration: none !important;
     }
     
@@ -294,8 +294,8 @@
         gap: 0.5rem;
         width: 100%;
         padding: 0.875rem;
-        background: linear-gradient(to right, #ef4444, #dc2626) !important;
-        color: white !important;
+        background: linear-gradient(to right, var(--error), var(--error-dark)) !important;
+        color: var(--surface) !important;
         text-decoration: none !important;
         border-radius: 12px;
         font-weight: 500;
@@ -307,9 +307,9 @@
     }
     
     .delete-btn:hover {
-        background: linear-gradient(to right, #dc2626, #b91c1c) !important;
+        background: linear-gradient(to right, var(--error-dark), var(--error)) !important;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 4px 12px var(--error-light);
     }
     
     .delete-icon {
@@ -334,7 +334,7 @@
     }
 
     .delete-btn-small .delete-icon {
-        fill: #ef4444;
+        fill: var(--error);
     }
 
     .model-name {
@@ -345,12 +345,12 @@
     }
 
     .model-name:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: var(--overlay);
     }
 
     .model-name.editing {
         cursor: text;
-        background-color: white;
+        background-color: var(--surface);
         border: 2px solid var(--primary);
         outline: none;
     }

@@ -1,74 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_head %}
-<style>
-    .hero-section {
-        text-align: center;
-        padding: 4rem 0;
-    }
-
-    .hero-title {
-        font-size: 3rem;
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        background: linear-gradient(to right, var(--primary), var(--secondary));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .hero-subtitle {
-        font-size: 1.25rem;
-        color: var(--text-secondary);
-        margin-bottom: 2.5rem;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-top: 4rem;
-    }
-
-    .feature-card {
-        background: var(--surface);
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: var(--primary);
-    }
-
-    .feature-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .feature-description {
-        color: var(--text-secondary);
-    }
-
-    .cta-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-</style>
-{% endblock %}
+{% block extra_head %}{% endblock %}
 
 {% block content %}
 <div class="hero-section">
@@ -90,14 +23,14 @@
             <p class="feature-description">Upload your data and let BoltML handle the rest. No machine learning expertise required.</p>
         </div>
         <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3 class="feature-title">Smart Analytics</h3>
-            <p class="feature-description">Automatic data analysis and visualization to help you understand your dataset.</p>
-        </div>
-        <div class="feature-card">
             <div class="feature-icon">⚡</div>
             <h3 class="feature-title">Fast Training</h3>
             <p class="feature-description">Optimized model training process to get you results quickly and efficiently.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⬇️</div>
+            <h3 class="feature-title">Easy to Deploy</h3>
+            <p class="feature-description">Unlike other solutions, simply download your model and use it in your own projects.</p>
         </div>
     </div>
 </div>

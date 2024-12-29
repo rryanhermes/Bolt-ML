@@ -96,8 +96,8 @@ def upload_csv(request):
         transformed_df = transform(df)  # No target column specified during upload
         request.session['transformed_data'] = transformed_df.to_json()
         
-        # Return column names and basic statistics
-        description = df.describe().to_html()
+        # Round numeric columns to 2 decimal places in the description
+        description = df.describe().round(2).to_html()
         
         return JsonResponse({
             'columns': list(df.columns),
