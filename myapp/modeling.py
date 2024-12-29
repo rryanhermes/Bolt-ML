@@ -1,7 +1,11 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score,
+    log_loss, mean_absolute_error, mean_squared_error, r2_score
+)
+import numpy as np
 import pandas as pd
 from collections import Counter
 
@@ -27,6 +31,58 @@ def transform(data, target_column=None):
     
     return df
 
+def calculate_classification_metric(y_true, y_pred, y_pred_proba, metric_name):
+    """Calculate the specified classification metric."""
+    metric_name = metric_name.lower()
+    if metric_name == 'accuracy':
+        return accuracy_score(y_true, y_pred)
+    elif metric_name == 'precision':
+        return precision_score(y_true, y_pred, average='weighted')
+    elif metric_name == 'recall':
+        return recall_score(y_true, y_pred, average='weighted')
+    elif metric_name == 'f1':
+        return f1_score(y_true, y_pred, average='weighted')
+    elif metric_name == 'auc':
+        # For multiclass, calculate macro average of one-vs-rest AUC
+        return roc_auc_score(y_true, y_pred_proba, multi_class='ovr', average='macro')
+    elif metric_name == 'log loss':
+        return log_loss(y_true, y_pred_proba)
+    elif metric_name.startswith(('p@k', 'ap@k', 'map@k')):
+        k = int(metric_name.split('k')[1]) if '@k' in metric_name else 5
+        if metric_name.startswith('p@k'):
+            # Precision at k implementation
+            return np.mean([1 if true in pred[:k] else 0 
+                          for true, pred in zip(y_true, y_pred_proba.argsort(axis=1)[:,::-1])])
+        elif metric_name.startswith('ap@k'):
+            # Average precision at k implementation
+            precisions = []
+            for true, pred in zip(y_true, y_pred_proba.argsort(axis=1)[:,::-1]):
+                hits = [1 if true in pred[:i+1] else 0 for i in range(k)]
+                precisions.append(np.mean(hits))
+            return np.mean(precisions)
+        else:  # map@k
+            return np.mean([calculate_classification_metric(y_true, y_pred, y_pred_proba, f'ap@k{k}')])
+    return 0.0
+
+def calculate_regression_metric(y_true, y_pred, metric_name):
+    """Calculate the specified regression metric."""
+    metric_name = metric_name.lower()
+    if metric_name == 'mae':
+        return mean_absolute_error(y_true, y_pred)
+    elif metric_name == 'mse':
+        return mean_squared_error(y_true, y_pred)
+    elif metric_name == 'rmse':
+        return np.sqrt(mean_squared_error(y_true, y_pred))
+    elif metric_name == 'rmsle':
+        return np.sqrt(mean_squared_error(np.log1p(y_true), np.log1p(y_pred)))
+    elif metric_name == 'mpe':
+        return np.mean((y_true - y_pred) / y_true) * 100
+    elif metric_name == 'mape':
+        return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+    elif metric_name == 'r2':
+        return r2_score(y_true, y_pred)
+    return 0.0
+
 class ModelWrapper:
     def __init__(self, model, label_encoder=None, problem_type=None):
         self.model = model
@@ -39,8 +95,8 @@ class ModelWrapper:
             return self.label_encoder.inverse_transform(predictions)
         return predictions
 
-def train_model(X, y, problem_type):
-    """Train a model based on the problem type."""
+def train_model(X, y, problem_type, metric_name='accuracy'):
+    """Train a model based on the problem type and evaluate using specified metric."""
     # Split the data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
@@ -56,9 +112,12 @@ def train_model(X, y, problem_type):
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Get accuracy
+        # Get predictions and probabilities
         y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
+        y_pred_proba = model.predict_proba(X_test)
+        
+        # Calculate the specified metric
+        score = calculate_classification_metric(y_test, y_pred, y_pred_proba, metric_name)
         
         # Wrap the model with the label encoder
         wrapped_model = ModelWrapper(model, label_encoder, 'classification')
@@ -68,11 +127,13 @@ def train_model(X, y, problem_type):
         model = RandomForestRegressor(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Get R² score as accuracy for regression
+        # Get predictions
         y_pred = model.predict(X_test)
-        accuracy = r2_score(y_test, y_pred)
+        
+        # Calculate the specified metric
+        score = calculate_regression_metric(y_test, y_pred, metric_name)
         
         # Wrap the model without label encoder for regression
         wrapped_model = ModelWrapper(model, None, 'regression')
     
-    return wrapped_model, accuracy 
+    return wrapped_model, score, metric_name 

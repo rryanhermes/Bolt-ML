@@ -13,4 +13,6 @@ urlpatterns = [
     path('build-model-api/', views.build_model, name='build_model_api'),
     path('delete-model/<int:model_id>/', views.delete_model, name='delete_model'),
     path('rename-model/<int:model_id>/', views.rename_model, name='rename_model'),
+    path('download-model/<int:model_id>/', views.download_model, name='download_model'),
+    path('set-timezone/', views.set_timezone, name='set_timezone'),
 ]

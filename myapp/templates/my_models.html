@@ -1,373 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_head %}
-<style>
-    body {
-        background-color: var(--background) !important;
-        min-height: 100vh;
-    }
-
-    .models-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    
-    .page-title {
-        font-size: 2rem;
-        color: var(--text) !important;
-        margin-bottom: 2rem;
-        font-weight: 600;
-        text-align: center;
-    }
-    
-    .models-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 2rem;
-        margin-top: 1.5rem;
-    }
-    
-    .model-card {
-        background: var(--surface) !important;
-        border-radius: 20px !important;
-        padding: 1.75rem !important;
-        box-shadow: 0 4px 6px var(--shadow),
-                    0 10px 15px -3px var(--shadow-hover) !important;
-        transition: transform 0.2s, box-shadow 0.2s !important;
-        border: 1px solid var(--border) !important;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
-    
-    .model-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(to right, var(--primary), var(--secondary));
-    }
-    
-    .model-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    .model-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding: 1rem;
-        gap: 0.5rem;
-    }
-    
-    .model-header h3 {
-        flex: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        word-wrap: break-word;
-        margin-right: 8px;
-    }
-    
-    .model-type {
-        padding: 0.35rem 1rem;
-        border-radius: 999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        letter-spacing: 0.025em;
-        display: inline-block;
-    }
-    
-    .model-type.classification {
-        background-color: #ebf8ff !important;
-        color: #2b6cb0 !important;
-        border: 1px solid #bee3f8;
-    }
-    
-    .model-type.regression {
-        background-color: #faf5ff !important;
-        color: #553c9a !important;
-        border: 1px solid #e9d8fd;
-    }
-    
-    .model-info {
-        margin: 1.25rem 0;
-        background: #f8fafc !important;
-        padding: 1rem;
-        border-radius: 12px;
-    }
-    
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-        font-size: 0.9rem;
-        color: var(--text) !important;
-    }
-    
-    .info-row:last-child {
-        margin-bottom: 0;
-    }
-    
-    .info-label {
-        color: var(--text-secondary) !important;
-        font-weight: 500;
-    }
-    
-    .info-value {
-        color: var(--text) !important;
-        font-weight: 500;
-    }
-    
-    .metrics {
-        background: var(--background) !important;
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin: 1.25rem 0;
-        border: 1px solid var(--border);
-    }
-    
-    .metric-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .metric-label {
-        color: var(--text-secondary) !important;
-        font-weight: 500;
-        font-size: 0.95rem;
-    }
-    
-    .metric-value {
-        color: var(--text) !important;
-        font-weight: 600;
-        font-size: 1.25rem;
-    }
-    
-    .download-btn {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 0.5rem;
-        width: 100%;
-        padding: 0.875rem;
-        background: linear-gradient(to right, var(--primary), var(--secondary)) !important;
-        color: var(--surface) !important;
-        text-decoration: none !important;
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border: none;
-        outline: none;
-        margin-top: 1rem;
-    }
-    
-    .download-btn:hover {
-        background: linear-gradient(to right, var(--primary-dark), var(--secondary-dark)) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px var(--shadow-hover);
-        color: var(--surface) !important;
-        text-decoration: none !important;
-    }
-    
-    .download-icon {
-        fill: currentColor;
-    }
-    
-    .no-models {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white !important;
-        border-radius: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        max-width: 500px;
-        margin: 2rem auto;
-    }
-    
-    .empty-icon {
-        fill: #a0aec0;
-        margin-bottom: 1.5rem;
-        width: 64px;
-        height: 64px;
-    }
-    
-    .no-models p {
-        color: #4a5568 !important;
-        font-size: 1.2rem;
-        margin: 1rem 0 1.5rem;
-        line-height: 1.6;
-    }
-    
-    .create-model-btn {
-        display: inline-block;
-        padding: 0.875rem 2rem;
-        background: linear-gradient(to right, #4299e1, #667eea) !important;
-        color: white !important;
-        text-decoration: none !important;
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    
-    .create-model-btn:hover {
-        background: linear-gradient(to right, #3182ce, #5a67d8) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-        color: white !important;
-        text-decoration: none !important;
-    }
-
-    .auth-required {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white !important;
-        border-radius: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
-                    0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        max-width: 500px;
-        margin: 2rem auto;
-    }
-
-    .auth-icon {
-        fill: #a0aec0;
-        margin-bottom: 1.5rem;
-        width: 64px;
-        height: 64px;
-    }
-
-    .auth-message {
-        color: #4a5568;
-        font-size: 1.2rem;
-        margin: 1rem 0 1.5rem;
-        line-height: 1.6;
-    }
-
-    .auth-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-
-    .auth-btn {
-        display: inline-block;
-        padding: 0.875rem 2rem;
-        text-decoration: none;
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-
-    .login-btn {
-        background: linear-gradient(to right, #4299e1, #667eea);
-        color: white;
-    }
-
-    .signup-btn {
-        background: white;
-        color: #4299e1;
-        border: 2px solid #4299e1;
-    }
-
-    .auth-btn:hover {
-        transform: translateY(-1px);
-    }
-
-    .login-btn:hover {
-        background: linear-gradient(to right, #3182ce, #5a67d8);
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-    }
-
-    .signup-btn:hover {
-        background: #f7fafc;
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.1);
-    }
-
-    .delete-btn {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 0.5rem;
-        width: 100%;
-        padding: 0.875rem;
-        background: linear-gradient(to right, var(--error), var(--error-dark)) !important;
-        color: var(--surface) !important;
-        text-decoration: none !important;
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border: none;
-        outline: none;
-        margin-top: 1rem;
-        cursor: pointer;
-    }
-    
-    .delete-btn:hover {
-        background: linear-gradient(to right, var(--error-dark), var(--error)) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px var(--error-light);
-    }
-    
-    .delete-icon {
-        fill: currentColor;
-    }
-
-    .delete-btn-small {
-        flex-shrink: 0;
-        background: none;
-        border: none;
-        padding: 4px;
-        cursor: pointer;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-
-    .delete-btn-small:hover {
-        background-color: rgba(239, 68, 68, 0.1);
-    }
-
-    .delete-btn-small .delete-icon {
-        fill: var(--error);
-    }
-
-    .model-name {
-        cursor: pointer;
-        padding: 2px 4px;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-    }
-
-    .model-name:hover {
-        background-color: var(--overlay);
-    }
-
-    .model-name.editing {
-        cursor: text;
-        background-color: var(--surface);
-        border: 2px solid var(--primary);
-        outline: none;
-    }
-
-    .model-name-input {
-        font-size: inherit;
-        font-weight: inherit;
-        font-family: inherit;
-        border: none;
-        outline: none;
-        width: 100%;
-        background: transparent;
-        color: inherit;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="models-container">
     <h2 class="page-title">My Models</h2>
@@ -406,10 +39,6 @@
                         <span class="info-value">{{ model.model_type|title }}</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Target</span>
-                        <span class="info-value">{{ model.metrics.target_column }}</span>
-                    </div>
-                    <div class="info-row">
                         <span class="info-label">Size</span>
                         <span class="info-value">{{ model.file_size }}</span>
                     </div>
@@ -417,17 +46,16 @@
                 {% if model.metrics %}
                 <div class="metrics">
                     <div class="metric-item">
-                        <span class="metric-label">Accuracy</span>
-                        <span class="metric-value">{{ model.metrics.accuracy|floatformat:3 }}</span>
+                        <span class="metric-label">{{ model.metrics.metric|default:"Score"|title }}</span>
+                        <span class="metric-value">
+                            {{ model.metrics.score|floatformat:4 }}
+                        </span>
                     </div>
                 </div>
                 {% endif %}
-                <a href="{{ model.file_path }}" class="download-btn" download>
-                    <svg class="download-icon" viewBox="0 0 24 24" width="16" height="16">
-                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                    </svg>
-                    Download Model
-                </a>
+                <div class="model-actions">
+                    <a href="{% url 'download_model' model.id %}" class="download-btn" download>Download</a>
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -455,11 +83,9 @@ function deleteModel(modelId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Remove the model card from the DOM
                 const modelCard = document.querySelector(`[data-model-id="${modelId}"]`);
                 modelCard.remove();
                 
-                // If no models left, show the empty state
                 if (document.querySelectorAll('.model-card').length === 0) {
                     location.reload();
                 }
@@ -473,40 +99,21 @@ function deleteModel(modelId) {
     }
 }
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 function startEditing(element, modelId) {
-    // Don't start editing if already editing
     if (element.classList.contains('editing')) return;
     
     const currentName = element.textContent.trim();
     element.classList.add('editing');
     
-    // Create input field
     const input = document.createElement('input');
     input.type = 'text';
     input.value = currentName;
     input.className = 'model-name-input';
     
-    // Replace text with input
     element.textContent = '';
     element.appendChild(input);
     input.focus();
     
-    // Handle input events
     function handleRename() {
         const newName = input.value.trim();
         if (newName && newName !== currentName) {
@@ -517,7 +124,6 @@ function startEditing(element, modelId) {
         element.classList.remove('editing');
     }
     
-    // Event listeners
     input.addEventListener('blur', handleRename);
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -554,6 +160,21 @@ function renameModel(modelId, newName, element) {
         element.textContent = element.getAttribute('data-original-name');
         alert('Error renaming model: ' + error);
     });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 </script>
 {% endblock %} 

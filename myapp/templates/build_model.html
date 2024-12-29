@@ -2,136 +2,6 @@
 {% load static %}
 
 {% block extra_head %}
-<style>
-    .upload-section {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-
-    .drop-zone {
-        border: 2px dashed var(--border);
-        border-radius: 16px;
-        padding: 3rem 2rem;
-        background: var(--surface);
-        transition: all 0.2s;
-        cursor: pointer;
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .drop-zone:hover {
-        border-color: var(--primary);
-        background: var(--background);
-    }
-
-    .drop-zone-content {
-        text-align: center;
-    }
-
-    .drop-zone-text {
-        font-size: 1.1rem;
-        color: var(--text-secondary);
-        margin-bottom: 0;
-    }
-
-    .browse-btn {
-        color: var(--primary);
-        text-decoration: underline;
-        display: inline;
-    }
-
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .loading-overlay.show {
-        display: flex;
-    }
-
-    .loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 4px solid var(--background);
-        border-top: 4px solid var(--primary);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .result-section {
-        margin-bottom: 3rem;
-    }
-
-    .data-preview {
-        overflow-x: auto;
-        background: var(--surface);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 2rem;
-    }
-
-    .data-preview table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .data-preview th,
-    .data-preview td {
-        padding: 0.75rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .data-preview th {
-        background: var(--background);
-        font-weight: 600;
-    }
-
-    .model-config {
-        background: var(--surface);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .model-config h3 {
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-        color: var(--text);
-        text-align: center;
-    }
-
-    .download-section {
-        text-align: center;
-        margin-top: 2rem;
-    }
-
-    .accuracy-display {
-        font-size: 1.2rem;
-        color: var(--text);
-        margin-bottom: 1rem;
-    }
-
-    .accuracy-value {
-        font-weight: 600;
-        color: var(--primary);
-    }
-</style>
-</style>
 {% endblock %}
 
 {% block content %}
@@ -168,6 +38,31 @@
                 <select id="problem-type" name="problem_type" class="form-control" required>
                     <option value="classification">Classification</option>
                     <option value="regression">Regression</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="evaluation-metric">Evaluation Metric:</label>
+                <select class="form-control" id="evaluation-metric" name="evaluation_metric" required>
+                    <optgroup label="Classification Metrics" class="classification-metrics">
+                        <option value="accuracy">Accuracy</option>
+                        <option value="precision">Precision (P)</option>
+                        <option value="recall">Recall (R)</option>
+                        <option value="f1">F1 score (F1)</option>
+                        <option value="auc">Area Under Curve (AUC)</option>
+                        <option value="log loss">Log loss</option>
+                        <option value="p@k5">Precision at k (P@5)</option>
+                        <option value="ap@k5">Average precision at k (AP@5)</option>
+                        <option value="map@k5">Mean average precision at k (MAP@5)</option>
+                    </optgroup>
+                    <optgroup label="Regression Metrics" class="regression-metrics" style="display:none;">
+                        <option value="mae">Mean absolute error (MAE)</option>
+                        <option value="mse">Mean squared error (MSE)</option>
+                        <option value="rmse">Root mean squared error (RMSE)</option>
+                        <option value="rmsle">Root mean squared logarithmic error (RMSLE)</option>
+                        <option value="mpe">Mean percentage error (MPE)</option>
+                        <option value="mape">Mean absolute percentage error (MAPE)</option>
+                        <option value="r2">R-square (R²)</option>
+                    </optgroup>
                 </select>
             </div>
             <div class="form-group">
@@ -304,7 +199,8 @@
             const formData = {
                 target_column: $('#target-column').val(),
                 problem_type: $('#problem-type').val(),
-                file_format: $('#file-format').val()
+                file_format: $('#file-format').val(),
+                evaluation_metric: $('#evaluation-metric').val()
             };
 
             $('#loadingOverlay').addClass('show');
@@ -318,20 +214,29 @@
                 body: JSON.stringify(formData)
             })
             .then(response => {
-                const accuracy = response.headers.get('X-Model-Accuracy');
-                if (accuracy) {
-                    $('#model-accuracy').text((parseFloat(accuracy) * 100).toFixed(2) + '%');
-                    $('#download-section').show();
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Server returned ${response.status}: ${text}`);
+                    });
                 }
-                return response.blob();
+                return response.json();
             })
-            .then(blob => {
-                modelBlob = blob;
-                modelFilename = `model_${formData.target_column}_${formData.problem_type}.${formData.file_format}`;
+            .then(data => {
+                if (data.success) {
+                    $('#model-accuracy').text(
+                        data.metric === 'accuracy' ? 
+                        (data.score * 100).toFixed(2) + '%' : 
+                        data.score.toFixed(4)
+                    );
+                    $('#download-section').show();
+                } else {
+                    throw new Error(data.error || 'Failed to build model');
+                }
                 $('#loadingOverlay').removeClass('show');
             })
             .catch(error => {
                 $('#loadingOverlay').removeClass('show');
+                console.error('Error details:', error);
                 alert('Error building model: ' + error);
             });
         });
@@ -347,6 +252,22 @@
                 a.click();
                 window.URL.revokeObjectURL(url);
                 a.remove();
+            }
+        });
+
+        document.getElementById('problem-type').addEventListener('change', function() {
+            const classificationMetrics = document.querySelector('.classification-metrics');
+            const regressionMetrics = document.querySelector('.regression-metrics');
+            const evaluationMetric = document.getElementById('evaluation-metric');
+            
+            if (this.value === 'classification') {
+                classificationMetrics.style.display = '';
+                regressionMetrics.style.display = 'none';
+                evaluationMetric.value = 'accuracy';
+            } else {
+                classificationMetrics.style.display = 'none';
+                regressionMetrics.style.display = '';
+                evaluationMetric.value = 'r2';
             }
         });
     });
