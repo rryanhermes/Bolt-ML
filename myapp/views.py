@@ -81,6 +81,49 @@ def my_models(request):
         'username': request.user.username
     })
 
+def validate_csv(df):
+    """
+    Validates if a CSV file is suitable for model building.
+    Returns (is_valid, message) tuple.
+    """
+    try:
+        # Check if dataframe is empty
+        if df.empty:
+            return False, "The CSV file is empty"
+            
+        # Check if there are any columns
+        if len(df.columns) < 2:
+            return False, "CSV must have at least 2 columns (features and target)"
+            
+        # Check for duplicate column names
+        if len(df.columns) != len(set(df.columns)):
+            return False, "CSV contains duplicate column names"
+            
+        # Check for unnamed columns
+        if any(not col or str(col).startswith('Unnamed: ') for col in df.columns):
+            return False, "CSV contains unnamed columns. All columns must have headers"
+            
+        # Check for empty columns
+        empty_cols = [col for col in df.columns if df[col].isna().all()]
+        if empty_cols:
+            return False, f"The following columns are empty: {', '.join(empty_cols)}"
+            
+        # Check if there's enough data
+        if len(df) < 10:
+            return False, "CSV must contain at least 10 rows of data for model building"
+            
+        # Check if there's at least one numeric or categorical column
+        numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
+        categorical_cols = df.select_dtypes(include=['object', 'category', 'bool']).columns
+        if len(numeric_cols) + len(categorical_cols) == 0:
+            return False, "CSV must contain at least one numeric or categorical column"
+            
+        # All checks passed
+        return True, "CSV is valid for model building"
+        
+    except Exception as e:
+        return False, f"Error validating CSV: {str(e)}"
+
 @login_required
 def upload_csv(request):
     if request.method != 'POST':
@@ -89,7 +132,11 @@ def upload_csv(request):
     try:
         csv_file = request.FILES['file']
         if not csv_file.name.endswith('.csv'):
-            return JsonResponse({'error': 'File must be a CSV'}, status=400)
+            return JsonResponse({
+                'error': 'File must be a CSV',
+                'is_valid': False,
+                'message': 'Invalid file type. Please upload a CSV file.'
+            }, status=400)
         
         # Store original filename in session (without path)
         request.session['original_filename'] = os.path.basename(csv_file.name)
@@ -98,9 +145,15 @@ def upload_csv(request):
             # Read and process the CSV file
             df = pd.read_csv(csv_file)
             
-            # Basic validation
-            if df.empty:
-                return JsonResponse({'error': 'The uploaded CSV file is empty'}, status=400)
+            # Validate the CSV
+            is_valid, message = validate_csv(df)
+            
+            if not is_valid:
+                return JsonResponse({
+                    'error': message,
+                    'is_valid': False,
+                    'message': message
+                }, status=400)
             
             # Store the original dataframe in the session
             request.session['original_data'] = df.to_json(orient='split', date_format='iso')
@@ -119,17 +172,31 @@ def upload_csv(request):
             return JsonResponse({
                 'columns': list(df.columns),
                 'description': description,
-                'plots': []  # Add any plots you want to show
+                'plots': [],  # Add any plots you want to show
+                'is_valid': True,
+                'message': message
             })
             
         except pd.errors.EmptyDataError:
-            return JsonResponse({'error': 'The uploaded CSV file is empty'}, status=400)
+            return JsonResponse({
+                'error': 'The uploaded CSV file is empty',
+                'is_valid': False,
+                'message': 'The CSV file is empty'
+            }, status=400)
         except pd.errors.ParserError:
-            return JsonResponse({'error': 'Invalid CSV format. Please check your file.'}, status=400)
+            return JsonResponse({
+                'error': 'Invalid CSV format. Please check your file.',
+                'is_valid': False,
+                'message': 'The file is not a valid CSV. Please check the format.'
+            }, status=400)
             
     except Exception as e:
         print(f"Error in upload_csv: {str(e)}")  # Add debug logging
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({
+            'error': str(e),
+            'is_valid': False,
+            'message': 'An error occurred while processing the file.'
+        }, status=400)
 
 @login_required
 def build_model(request):
@@ -199,10 +266,10 @@ def build_model(request):
         
         # Save the model
         try:
-            # Get file format from request or default to joblib
-            file_format = data.get('file_format', 'joblib')
+            # Get file format from request or default to pkl
+            file_format = data.get('file_format', 'pkl')
             if file_format not in ['pkl', 'joblib']:
-                file_format = 'joblib'  # Default to joblib if invalid format specified
+                file_format = 'pkl'  # Default to pkl if invalid format specified
             
             # Remove .csv extension if present and clean filename
             base_filename = original_filename.lower().replace('.csv', '').replace(' ', '_')
@@ -481,3 +548,53 @@ joblib>=0.17.0"""
     except Exception as e:
         print(f"Error downloading model: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
+
+def premium(request):
+    """
+    View for the premium subscription page.
+    """
+    return render(request, 'premium.html', {
+        'username': request.user.username if request.user.is_authenticated else None
+    })
+
+def blog(request):
+    """
+    View for the blog page.
+    """
+    return render(request, 'blog.html', {
+        'username': request.user.username if request.user.is_authenticated else None
+    })
+
+@csrf_exempt
+def newsletter_signup(request):
+    """
+    Handle newsletter signup submissions.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        email = data.get('email')
+        
+        if not email:
+            return JsonResponse({'error': 'Email is required'}, status=400)
+        
+        # Here you would typically:
+        # 1. Validate the email
+        # 2. Add it to your newsletter service/database
+        # 3. Send a confirmation email
+        # For now, we'll just return success
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Thank you for subscribing to our newsletter!'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def about(request):
+    return render(request, 'about.html')

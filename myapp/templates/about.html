@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}About - BoltML{% endblock %}
+
+{% block content %}
+<div class="page-title">About BoltML</div>
+
+<div class="about-container" style="max-width: 800px; margin: 0 auto;">
+    <!-- Mission Section -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="color: var(--orange); margin-bottom: 1.5rem;">Our Mission</h2>
+        <p style="color: var(--off-white); line-height: 1.6;">BoltML is dedicated to making machine learning accessible to everyone. We believe that powerful AI tools should be available to individuals and businesses of all sizes, not just large corporations with extensive resources.</p>
+        
+        <p style="color: var(--off-white); line-height: 1.6; margin-top: 1rem;">We provide an intuitive platform for building, training, and deploying machine learning models without requiring deep technical expertise. Our automated ML pipeline handles the complexity, allowing you to focus on solving real business problems.</p>
+    </div>
+
+    <!-- Team Section -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="color: var(--orange); margin-bottom: 1.5rem;">Our Team</h2>
+        <div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+            <div class="team-member" style="text-align: center;">
+                <div class="member-avatar" style="width: 120px; height: 120px; border-radius: 60px; background: var(--gray-dark); margin: 0 auto 1rem; border: 2px solid var(--orange);"></div>
+                <h3 style="color: var(--orange); margin-bottom: 0.5rem;">John Smith</h3>
+                <p style="color: var(--off-white);">Founder & CEO</p>
+            </div>
+            <div class="team-member" style="text-align: center;">
+                <div class="member-avatar" style="width: 120px; height: 120px; border-radius: 60px; background: var(--gray-dark); margin: 0 auto 1rem; border: 2px solid var(--orange);"></div>
+                <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Sarah Johnson</h3>
+                <p style="color: var(--off-white);">Lead ML Engineer</p>
+            </div>
+            <div class="team-member" style="text-align: center;">
+                <div class="member-avatar" style="width: 120px; height: 120px; border-radius: 60px; background: var(--gray-dark); margin: 0 auto 1rem; border: 2px solid var(--orange);"></div>
+                <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Mike Chen</h3>
+                <p style="color: var(--off-white);">Head of Product</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="card">
+        <h2 style="color: var(--orange); margin-bottom: 1.5rem;">Contact Us</h2>
+        <div style="display: grid; gap: 1.5rem;">
+            <div class="contact-info" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="contact-icon" style="width: 40px; height: 40px; background: var(--gray-dark); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--orange);">
+                    📧
+                </div>
+                <div>
+                    <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Email</h3>
+                    <p style="color: var(--off-white);">support@boltml.com</p>
+                </div>
+            </div>
+            <div class="contact-info" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="contact-icon" style="width: 40px; height: 40px; background: var(--gray-dark); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--orange);">
+                    📍
+                </div>
+                <div>
+                    <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Location</h3>
+                    <p style="color: var(--off-white);">Minneapolis, MN</p>
+                </div>
+            </div>
+            <div class="contact-info" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="contact-icon" style="width: 40px; height: 40px; background: var(--gray-dark); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--orange);">
+                    🕒
+                </div>
+                <div>
+                    <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Support Hours</h3>
+                    <p style="color: var(--off-white);">Monday - Friday, 9AM - 6PM PST</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -15,10 +15,19 @@
         </div>
     </div>
     <input type="file" id="file-input" accept=".csv" style="display: none;">
+    
+    <!-- Add validation status display -->
+    <div id="validation-status" style="display: none;" class="validation-status">
+        <div class="validation-icon"></div>
+        <p class="validation-message"></p>
+    </div>
 </div>
 
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
+<div id="loadingOverlay" class="loading-overlay">
+    <div style="display: flex; align-items: center;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Uploading and processing your CSV file...</div>
+    </div>
 </div>
 
 <div class="result-section">
@@ -27,63 +36,82 @@
     <div id="ml-form" class="model-config" style="display: none;">
         <h3>Configure Your Model</h3>
         <form id="ml-config">
-            <div class="form-group">
-                <label class="form-label" for="target-column">Target Column</label>
-                <select id="target-column" name="target_column" class="form-control" required>
-                    <!-- Will be populated dynamically -->
-                </select>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="target-column">Target Column</label>
+                    <select id="target-column" name="target_column" class="form-control" required>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="problem-type">Problem Type</label>
+                    <select id="problem-type" name="problem_type" class="form-control" required>
+                        <option value="classification">Classification</option>
+                        <option value="regression">Regression</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="evaluation-metric">Evaluation Metric</label>
+                    <select id="evaluation-metric" name="evaluation_metric" class="form-control" required>
+                        <optgroup label="Classification Metrics" class="classification-metrics">
+                            <option value="accuracy">Accuracy</option>
+                            <option value="precision">Precision (P)</option>
+                            <option value="recall">Recall (R)</option>
+                            <option value="f1">F1 score (F1)</option>
+                            <option value="auc">Area Under Curve (AUC)</option>
+                        </optgroup>
+                        <optgroup label="Regression Metrics" class="regression-metrics">
+                            <option value="r2">R² Score</option>
+                            <option value="mse">Mean Squared Error</option>
+                            <option value="rmse">Root Mean Squared Error</option>
+                            <option value="mae">Mean Absolute Error</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="file-format">File Format</label>
+                    <select id="file-format" name="file_format" class="form-control" required>
+                        <option value="joblib">Joblib (.joblib)</option>
+                        <option value="pkl">Pickle (.pkl)</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label" for="problem-type">Problem Type</label>
-                <select id="problem-type" name="problem_type" class="form-control" required>
-                    <option value="classification">Classification</option>
-                    <option value="regression">Regression</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="evaluation-metric">Evaluation Metric:</label>
-                <select class="form-control" id="evaluation-metric" name="evaluation_metric" required>
-                    <optgroup label="Classification Metrics" class="classification-metrics">
-                        <option value="accuracy">Accuracy</option>
-                        <option value="precision">Precision (P)</option>
-                        <option value="recall">Recall (R)</option>
-                        <option value="f1">F1 score (F1)</option>
-                        <option value="auc">Area Under Curve (AUC)</option>
-                        <option value="log loss">Log loss</option>
-                        <option value="p@k5">Precision at k (P@5)</option>
-                        <option value="ap@k5">Average precision at k (AP@5)</option>
-                        <option value="map@k5">Mean average precision at k (MAP@5)</option>
-                    </optgroup>
-                    <optgroup label="Regression Metrics" class="regression-metrics" style="display:none;">
-                        <option value="mae">Mean absolute error (MAE)</option>
-                        <option value="mse">Mean squared error (MSE)</option>
-                        <option value="rmse">Root mean squared error (RMSE)</option>
-                        <option value="rmsle">Root mean squared logarithmic error (RMSLE)</option>
-                        <option value="mpe">Mean percentage error (MPE)</option>
-                        <option value="mape">Mean absolute percentage error (MAPE)</option>
-                        <option value="r2">R-square (R²)</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="file-format">File Format</label>
-                <select id="file-format" name="file_format" class="form-control" required>
-                    <option value="pkl">Pickle (.pkl)</option>
-                    <option value="joblib">Joblib (.joblib)</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Build Model</button>
+            <button type="submit" id="build-model-btn" class="btn btn-primary" style="width: 100%;" disabled>Build Model</button>
         </form>
     </div>
 
     <div id="download-section" class="download-section" style="display: none;">
         <p class="accuracy-display">Model Accuracy: <span id="model-accuracy" class="accuracy-value"></span></p>
-        <button id="download-button" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 0.5rem;">
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-            </svg>
-            Download Model
-        </button>
+        
+        <div class="options-container">
+            <!-- Free Download Option -->
+            <div class="option-card free">
+                <h3>Download Model</h3>
+                <p>Download your trained model and start using it right away.</p>
+                <button id="download-button" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 0.5rem;">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download Model
+                </button>
+            </div>
+            
+            <!-- Premium Option -->
+            <div class="option-card premium">
+                <div class="premium-badge">PREMIUM</div>
+                <h3>Enhance Performance</h3>
+                <p>Unlock advanced optimization techniques to improve your model's accuracy by up to 30%!</p>
+                <ul>
+                    <li>Advanced feature engineering</li>
+                    <li>Hyperparameter optimization</li>
+                    <li>Ensemble methods</li>
+                    <li>Cross-validation</li>
+                </ul>
+                <button onclick="window.location.href='/premium'" class="btn premium-btn">
+                    Upgrade & Improve
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -125,42 +153,61 @@
         });
 
         function handleFileUpload(file) {
-            var formData = new FormData();
+            if (!file.name.endsWith('.csv')) {
+                showValidationStatus(false, 'Please upload a CSV file');
+                return;
+            }
+            
+            const formData = new FormData();
             formData.append('file', file);
-            formData.append('csrfmiddlewaretoken', csrftoken);
-
-            $('#loadingOverlay').addClass('show');
-
+            
+            // Show loading overlay
+            document.getElementById('loadingOverlay').classList.add('show');
+            
             $.ajax({
                 url: '/upload-csv/',
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
-                timeout: 10000,
-                success: function(response) {
-                    $('#loadingOverlay').removeClass('show');
-                    
-                    console.log('Available columns:', response.columns);
-                    
-                    $('#result').html(response.description);
-                    response.plots.forEach(function(plot) {
-                        $('#result').append(plot);
-                    });
-                    
-                    const targetSelect = $('#target-column');
-                    targetSelect.empty();
-                    response.columns.forEach(function(column) {
-                        targetSelect.append($('<option>', {
-                            value: column,
-                            text: column
-                        }));
-                    });
-                    $('#ml-form').show();
+                headers: {
+                    'X-CSRFToken': csrftoken
                 },
-                error: function(xhr, status, error) {
-                    $('#loadingOverlay').removeClass('show');
-                    $('#result').html('An error occurred while processing the file.');
+                success: function(response) {
+                    // Hide loading overlay
+                    document.getElementById('loadingOverlay').classList.remove('show');
+                    
+                    if (response.is_valid) {
+                        // Hide validation status for valid files
+                        $('#validation-status').hide();
+                        $('#result').html(response.description);
+                        response.plots.forEach(function(plot) {
+                            $('#result').append(plot);
+                        });
+                        
+                        const targetSelect = $('#target-column');
+                        targetSelect.empty();
+                        response.columns.forEach(function(column) {
+                            targetSelect.append($('<option>', {
+                                value: column,
+                                text: column
+                            }));
+                        });
+                        $('#ml-form').show();
+                        document.getElementById('build-model-btn').disabled = false;
+                    } else {
+                        showValidationStatus(false, response.message);
+                        $('#ml-form').hide();
+                        $('#result').html('');
+                    }
+                },
+                error: function(xhr) {
+                    // Hide loading overlay
+                    document.getElementById('loadingOverlay').classList.remove('show');
+                    const response = xhr.responseJSON || {};
+                    showValidationStatus(false, response.message || 'An error occurred while processing the file');
+                    $('#ml-form').hide();
+                    $('#result').html('');
                 }
             });
         }
@@ -256,20 +303,111 @@
         });
 
         document.getElementById('problem-type').addEventListener('change', function() {
-            const classificationMetrics = document.querySelector('.classification-metrics');
-            const regressionMetrics = document.querySelector('.regression-metrics');
+            const problemType = this.value;
             const evaluationMetric = document.getElementById('evaluation-metric');
             
-            if (this.value === 'classification') {
-                classificationMetrics.style.display = '';
-                regressionMetrics.style.display = 'none';
+            // Clear existing options
+            while (evaluationMetric.firstChild) {
+                evaluationMetric.firstChild.remove();
+            }
+            
+            if (problemType === 'classification') {
+                const classificationMetrics = [
+                    { value: 'accuracy', text: 'Accuracy' },
+                    { value: 'precision', text: 'Precision (P)' },
+                    { value: 'recall', text: 'Recall (R)' },
+                    { value: 'f1', text: 'F1 score (F1)' },
+                    { value: 'auc', text: 'Area Under Curve (AUC)' }
+                ];
+                
+                classificationMetrics.forEach(metric => {
+                    const option = document.createElement('option');
+                    option.value = metric.value;
+                    option.textContent = metric.text;
+                    evaluationMetric.appendChild(option);
+                });
+                
                 evaluationMetric.value = 'accuracy';
             } else {
-                classificationMetrics.style.display = 'none';
-                regressionMetrics.style.display = '';
+                const regressionMetrics = [
+                    { value: 'r2', text: 'R² Score' },
+                    { value: 'mse', text: 'Mean Squared Error' },
+                    { value: 'rmse', text: 'Root Mean Squared Error' },
+                    { value: 'mae', text: 'Mean Absolute Error' }
+                ];
+                
+                regressionMetrics.forEach(metric => {
+                    const option = document.createElement('option');
+                    option.value = metric.value;
+                    option.textContent = metric.text;
+                    evaluationMetric.appendChild(option);
+                });
+                
                 evaluationMetric.value = 'r2';
             }
         });
+
+        function showValidationStatus(isValid, message) {
+            const validationStatus = document.getElementById('validation-status');
+            validationStatus.style.display = 'flex';
+            validationStatus.className = 'validation-status ' + (isValid ? 'valid' : 'invalid');
+            validationStatus.querySelector('.validation-message').textContent = message;
+            document.getElementById('build-model-btn').disabled = !isValid;
+        }
     });
 </script>
 {% endblock %}
+
+<style>
+    .validation-status {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .validation-status.invalid {
+        background-color: rgba(239, 68, 68, 0.15);
+        border: 2px solid var(--red);
+        color: var(--red);
+    }
+    
+    .validation-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        position: relative;
+    }
+    
+    .validation-status.invalid .validation-icon::before {
+        content: '✕';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--red);
+        font-size: 18px;
+    }
+    
+    .validation-message {
+        margin: 0;
+        font-size: 1.1rem;
+        line-height: 1.4;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

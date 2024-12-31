@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-title">Upgrade to BoltML Premium</div>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+    <!-- Premium Plan Card -->
+    <div class="card" style="max-width: 500px; margin: 0 auto 3rem; text-align: center; position: relative; overflow: hidden;">
+        <!-- Gradient Background -->
+        <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+        
+        <!-- Content -->
+        <div style="position: relative; z-index: 1;">
+            <h2 style="color: var(--orange); font-size: 1.5rem; margin-bottom: 1rem;">Premium Plan</h2>
+            
+            <!-- Price -->
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 4rem; color: var(--white); font-weight: 800;">
+                    <span style="font-size: 2rem; vertical-align: super;">$</span>10
+                    <span style="font-size: 1.25rem; color: var(--off-white);">/month</span>
+                </div>
+            </div>
+            
+            <!-- Features List -->
+            <ul style="list-style: none; padding: 0; margin: 0 0 2rem 0; text-align: left;">
+                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    Advanced Feature Engineering
+                </li>
+                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    Hyperparameter Optimization
+                </li>
+                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    Ensemble Methods
+                </li>
+                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    Cross-validation
+                </li>
+                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    Priority Support
+                </li>
+            </ul>
+            
+            <!-- Upgrade Button -->
+            <button style="width: 100%; padding: 1.2rem; font-size: 1.2rem; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(243, 146, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(243, 146, 0, 0.2)';">
+                Upgrade Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div style="margin-top: 4rem;">
+        <h2 style="text-align: center; color: var(--orange); font-size: 2rem; margin-bottom: 3rem;">Premium Features</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <!-- Feature 1 -->
+            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+                <div style="position: relative; z-index: 1;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Advanced Feature Engineering</h3>
+                    <p style="color: var(--off-white); line-height: 1.6;">Automatically discover and create optimal features from your data to improve model performance.</p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+                <div style="position: relative; z-index: 1;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Hyperparameter Optimization</h3>
+                    <p style="color: var(--off-white); line-height: 1.6;">Find the perfect model settings automatically using advanced optimization techniques.</p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+                <div style="position: relative; z-index: 1;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Ensemble Methods</h3>
+                    <p style="color: var(--off-white); line-height: 1.6;">Combine multiple models to achieve higher accuracy and better predictions.</p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+                <div style="position: relative; z-index: 1;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Cross-validation</h3>
+                    <p style="color: var(--off-white); line-height: 1.6;">Ensure your model's reliability with advanced validation techniques.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const upgradeBtn = document.querySelector('button');
+        
+        upgradeBtn.addEventListener('click', async function() {
+            alert('Premium upgrade feature coming soon! Please check back later.');
+        });
+    });
+</script>
+{% endblock %} 

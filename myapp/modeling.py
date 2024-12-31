@@ -1,87 +1,94 @@
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler, RobustScaler
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score, roc_auc_score,
-    log_loss, mean_absolute_error, mean_squared_error, r2_score
-)
-import numpy as np
+from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
+from sklearn.feature_selection import SelectFromModel
 import pandas as pd
+import numpy as np
 from collections import Counter
 
-def transform(data, target_column=None):
-    """Transform the input data by encoding categorical variables."""
+def transform(data, target_column=None, problem_type='classification'):
+    """Transform the input data with enhanced preprocessing for better model accuracy."""
     df = data.copy()
     
     # Identify column types
     categorical_columns = df.select_dtypes(include=['object']).columns
     numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns
     
-    # Remove target column from categorical columns if it exists
-    if target_column and target_column in categorical_columns:
-        categorical_columns = categorical_columns.drop(target_column)
+    # Remove target column from feature columns
+    if target_column:
+        if target_column in categorical_columns:
+            categorical_columns = categorical_columns.drop(target_column)
+        if target_column in numerical_columns:
+            numerical_columns = numerical_columns.drop(target_column)
     
-    # Handle categorical columns with one-hot encoding
+    # Handle numerical features
+    if len(numerical_columns) > 0:
+        # Handle outliers using Robust Scaler for numerical columns
+        robust_scaler = RobustScaler()
+        df[numerical_columns] = robust_scaler.fit_transform(df[numerical_columns])
+        
+        # Fill missing values with median (more robust to outliers)
+        for col in numerical_columns:
+            df[col] = df[col].fillna(df[col].median())
+    
+    # Handle categorical features
     if len(categorical_columns) > 0:
-        df = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
+        for col in categorical_columns:
+            unique_count = df[col].nunique()
+            null_count = df[col].isnull().sum()
+            
+            # Handle missing values first
+            if null_count > 0:
+                # For high cardinality, use a special "MISSING" category
+                if unique_count > 10:
+                    df[col] = df[col].fillna("MISSING")
+                else:
+                    df[col] = df[col].fillna(df[col].mode()[0])
+            
+            # Encoding strategy based on cardinality
+            if unique_count <= 2:
+                # Binary categories: Use label encoding
+                le = LabelEncoder()
+                df[col] = le.fit_transform(df[col])
+            elif unique_count <= 10:
+                # Low cardinality: Use one-hot encoding
+                df = pd.get_dummies(df, columns=[col], prefix=col)
+            elif target_column and problem_type.lower() == 'classification':
+                # High cardinality: Use target encoding for classification
+                target_means = df.groupby(col)[target_column].mean()
+                df[col] = df[col].map(target_means)
+            else:
+                # High cardinality: Use frequency encoding for regression or when no target
+                value_counts = df[col].value_counts(normalize=True)
+                df[col] = df[col].map(value_counts)
     
-    # Fill any missing values in numerical columns with median
-    for col in numerical_columns:
-        df[col] = df[col].fillna(df[col].median())
+    # Handle target column if present
+    if target_column:
+        if df[target_column].dtype == 'object':
+            le = LabelEncoder()
+            df[target_column] = le.fit_transform(df[target_column])
+    
+    # Feature selection for high-dimensional data
+    if df.shape[1] > 20 and target_column:  # Only if we have many features and a target
+        X = df.drop(columns=[target_column])
+        y = df[target_column]
+        
+        # Use Random Forest for feature importance-based selection
+        if problem_type.lower() == 'classification':
+            selector = SelectFromModel(RandomForestClassifier(n_estimators=100, random_state=42))
+        else:
+            selector = SelectFromModel(RandomForestRegressor(n_estimators=100, random_state=42))
+        
+        selector.fit(X, y)
+        selected_features = X.columns[selector.get_support()].tolist()
+        
+        # Keep only selected features and target
+        if target_column not in selected_features:
+            selected_features.append(target_column)
+        df = df[selected_features]
     
     return df
-
-def calculate_classification_metric(y_true, y_pred, y_pred_proba, metric_name):
-    """Calculate the specified classification metric."""
-    metric_name = metric_name.lower()
-    if metric_name == 'accuracy':
-        return accuracy_score(y_true, y_pred)
-    elif metric_name == 'precision':
-        return precision_score(y_true, y_pred, average='weighted')
-    elif metric_name == 'recall':
-        return recall_score(y_true, y_pred, average='weighted')
-    elif metric_name == 'f1':
-        return f1_score(y_true, y_pred, average='weighted')
-    elif metric_name == 'auc':
-        # For multiclass, calculate macro average of one-vs-rest AUC
-        return roc_auc_score(y_true, y_pred_proba, multi_class='ovr', average='macro')
-    elif metric_name == 'log loss':
-        return log_loss(y_true, y_pred_proba)
-    elif metric_name.startswith(('p@k', 'ap@k', 'map@k')):
-        k = int(metric_name.split('k')[1]) if '@k' in metric_name else 5
-        if metric_name.startswith('p@k'):
-            # Precision at k implementation
-            return np.mean([1 if true in pred[:k] else 0 
-                          for true, pred in zip(y_true, y_pred_proba.argsort(axis=1)[:,::-1])])
-        elif metric_name.startswith('ap@k'):
-            # Average precision at k implementation
-            precisions = []
-            for true, pred in zip(y_true, y_pred_proba.argsort(axis=1)[:,::-1]):
-                hits = [1 if true in pred[:i+1] else 0 for i in range(k)]
-                precisions.append(np.mean(hits))
-            return np.mean(precisions)
-        else:  # map@k
-            return np.mean([calculate_classification_metric(y_true, y_pred, y_pred_proba, f'ap@k{k}')])
-    return 0.0
-
-def calculate_regression_metric(y_true, y_pred, metric_name):
-    """Calculate the specified regression metric."""
-    metric_name = metric_name.lower()
-    if metric_name == 'mae':
-        return mean_absolute_error(y_true, y_pred)
-    elif metric_name == 'mse':
-        return mean_squared_error(y_true, y_pred)
-    elif metric_name == 'rmse':
-        return np.sqrt(mean_squared_error(y_true, y_pred))
-    elif metric_name == 'rmsle':
-        return np.sqrt(mean_squared_error(np.log1p(y_true), np.log1p(y_pred)))
-    elif metric_name == 'mpe':
-        return np.mean((y_true - y_pred) / y_true) * 100
-    elif metric_name == 'mape':
-        return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-    elif metric_name == 'r2':
-        return r2_score(y_true, y_pred)
-    return 0.0
 
 class ModelWrapper:
     def __init__(self, model, label_encoder=None, problem_type=None):
@@ -95,8 +102,8 @@ class ModelWrapper:
             return self.label_encoder.inverse_transform(predictions)
         return predictions
 
-def train_model(X, y, problem_type, metric_name='accuracy'):
-    """Train a model based on the problem type and evaluate using specified metric."""
+def train_model(X, y, problem_type, evaluation_metric='accuracy'):
+    """Train a model based on the problem type and evaluation metric."""
     # Split the data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
@@ -112,12 +119,34 @@ def train_model(X, y, problem_type, metric_name='accuracy'):
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Get predictions and probabilities
+        # Get predictions
         y_pred = model.predict(X_test)
-        y_pred_proba = model.predict_proba(X_test)
         
-        # Calculate the specified metric
-        score = calculate_classification_metric(y_test, y_pred, y_pred_proba, metric_name)
+        # Calculate metric based on evaluation_metric parameter
+        if evaluation_metric == 'accuracy':
+            score = accuracy_score(y_test, y_pred)
+        elif evaluation_metric == 'precision':
+            from sklearn.metrics import precision_score
+            score = precision_score(y_test, y_pred, average='weighted')
+        elif evaluation_metric == 'recall':
+            from sklearn.metrics import recall_score
+            score = recall_score(y_test, y_pred, average='weighted')
+        elif evaluation_metric == 'f1':
+            from sklearn.metrics import f1_score
+            score = f1_score(y_test, y_pred, average='weighted')
+        elif evaluation_metric == 'auc':
+            from sklearn.metrics import roc_auc_score
+            # For multi-class, we need to binarize the labels
+            from sklearn.preprocessing import label_binarize
+            classes = list(range(len(set(y_test))))
+            if len(classes) > 2:
+                y_test_bin = label_binarize(y_test, classes=classes)
+                y_pred_proba = model.predict_proba(X_test)
+                score = roc_auc_score(y_test_bin, y_pred_proba, multi_class='ovr')
+            else:
+                score = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+        else:
+            score = accuracy_score(y_test, y_pred)  # Default to accuracy
         
         # Wrap the model with the label encoder
         wrapped_model = ModelWrapper(model, label_encoder, 'classification')
@@ -130,10 +159,20 @@ def train_model(X, y, problem_type, metric_name='accuracy'):
         # Get predictions
         y_pred = model.predict(X_test)
         
-        # Calculate the specified metric
-        score = calculate_regression_metric(y_test, y_pred, metric_name)
+        # Calculate metric based on evaluation_metric parameter
+        if evaluation_metric == 'r2':
+            score = r2_score(y_test, y_pred)
+        elif evaluation_metric == 'mse':
+            score = mean_squared_error(y_test, y_pred)
+        elif evaluation_metric == 'rmse':
+            score = mean_squared_error(y_test, y_pred, squared=False)
+        elif evaluation_metric == 'mae':
+            from sklearn.metrics import mean_absolute_error
+            score = mean_absolute_error(y_test, y_pred)
+        else:
+            score = r2_score(y_test, y_pred)  # Default to R²
         
         # Wrap the model without label encoder for regression
         wrapped_model = ModelWrapper(model, None, 'regression')
     
-    return wrapped_model, score, metric_name 
+    return wrapped_model, score, evaluation_metric 

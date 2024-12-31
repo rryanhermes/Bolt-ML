@@ -22,11 +22,15 @@
                 </a>
             </div>
             <ul class="nav-links">
-                <li><a href="{% url 'index' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
                 <li><a href="{% url 'build_model' %}" class="nav-link {% if 'build-model' in request.path %}active{% endif %}">Build Model</a></li>
                 {% if request.user.is_authenticated %}
                     <li><a href="{% url 'my_models' %}" class="nav-link {% if 'my-models' in request.path %}active{% endif %}">My Models</a></li>
-                    <li><a href="{% url 'my_account' %}" class="nav-link {% if 'my-account' in request.path %}active{% endif %}">My Account</a></li>
+                {% endif %}
+                <li><a href="{% url 'premium' %}" class="nav-link {% if 'premium' in request.path %}active{% endif %}">Premium</a></li>
+                <li><a href="{% url 'blog' %}" class="nav-link {% if 'blog' in request.path %}active{% endif %}">Blog</a></li>
+                <li><a href="{% url 'about' %}" class="nav-link {% if 'about' in request.path %}active{% endif %}">About</a></li>
+                {% if request.user.is_authenticated %}
+                    <li><a href="{% url 'my_account' %}" class="nav-link {% if 'my-account' in request.path %}active{% endif %}" style="font-size: 1.2rem; padding: 0.5rem;">👤</a></li>
                 {% else %}
                     <li><a href="{% url 'signup' %}" class="nav-link {% if 'signup' in request.path %}active{% endif %}">Sign Up</a></li>
                     <li><a href="{% url 'login' %}" class="nav-link {% if 'login' in request.path %}active{% endif %}">Log In</a></li>
