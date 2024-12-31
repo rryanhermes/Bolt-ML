@@ -53,19 +53,19 @@
                     </div>
                 </div>
                 {% endif %}
-                <div class="model-actions" style="display: flex; gap: 1rem;">
-                    <a href="{% url 'download_model' model.id %}" class="download-btn" style="flex: 1; text-decoration: none; text-align: center; padding: 0.875rem; background: var(--primary); color: var(--actual-white); border-radius: 12px; font-weight: 500; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div class="model-actions">
+                    <a href="{% url 'download_model' model.id %}" class="download-btn">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </svg>
                         Download
                     </a>
                     {% if request.user.userprofile.is_premium %}
-                        <button onclick="improveModel({{ model.id }})" style="flex: 1; padding: 0.875rem; background: linear-gradient(to right, var(--orange), var(--red)); color: var(--actual-white); text-decoration: none; border-radius: 12px; font-weight: 500; transition: all 0.3s; border: none; outline: none; position: relative; overflow: hidden; cursor: pointer;">
+                        <button onclick="improveModel({{ model.id }})" class="improve-model-btn">
                             Improve Model
                         </button>
                     {% else %}
-                        <a href="{% url 'premium' %}" style="flex: 1; padding: 0.875rem; background: var(--gray-dark); color: var(--off-white); text-decoration: none; border-radius: 12px; font-weight: 500; transition: all 0.3s; border: 1px solid var(--orange); text-align: center;">
+                        <a href="{% url 'premium' %}" class="upgrade-btn">
                             Upgrade to Improve →
                         </a>
                     {% endif %}

@@ -198,16 +198,27 @@ def upload_csv(request):
             'message': 'An error occurred while processing the file.'
         }, status=400)
 
+def format_metric_name(metric_name):
+    """Format metric name for display"""
+    metric_map = {
+        'accuracy': 'Accuracy',
+        'precision': 'Precision',
+        'recall': 'Recall',
+        'f1': 'F1 Score',
+        'auc': 'AUC',
+        'r2': 'R² Score',
+        'mse': 'Mean Squared Error',
+        'rmse': 'Root Mean Squared Error',
+        'mae': 'Mean Absolute Error'
+    }
+    return metric_map.get(metric_name, metric_name.upper())
+
 @login_required
 def build_model(request):
     if request.method != 'POST':
-        return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
-    
-    if not request.headers.get('Content-Type') == 'application/json':
-        return JsonResponse({'error': 'Content-Type must be application/json'}, status=400)
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
     
     try:
-        # Parse JSON data from request body
         data = json.loads(request.body)
         target_column = data.get('target_column')
         problem_type = data.get('problem_type')
@@ -308,7 +319,7 @@ def build_model(request):
                 file_path=rel_model_path,  # Store relative path in database
                 metrics={
                     'score': float(score),
-                    'metric': metric_name,
+                    'metric': metric_name,  # Use original metric name
                     'format': file_format
                 }
             )
@@ -323,7 +334,7 @@ def build_model(request):
             'success': True,
             'model_id': user_model.id,
             'score': float(score),
-            'metric': metric_name,
+            'metric': format_metric_name(metric_name),  # Format metric name for display
             'model_url': f'/download-model/{user_model.id}/',
             'filename': model_filename
         })
@@ -600,3 +611,61 @@ def newsletter_signup(request):
 
 def about(request):
     return render(request, 'about.html')
+
+@login_required
+def get_sample_dataset(request, dataset_name):
+    """Handle sample dataset requests"""
+    try:
+        # Map dataset names to file paths
+        dataset_paths = {
+            'titanic': 'models/titanic.csv',
+            'housing': 'models/housingprices.csv',
+            'credit': 'models/credit.csv'
+        }
+        
+        if dataset_name not in dataset_paths:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid dataset name'
+            }, status=400)
+            
+        # Get the absolute path to the dataset
+        dataset_path = os.path.join(settings.BASE_DIR, dataset_paths[dataset_name])
+        
+        # Read the CSV file
+        df = pd.read_csv(dataset_path)
+        
+        # Store the original dataframe in the session
+        request.session['original_data'] = df.to_json(orient='split', date_format='iso')
+        request.session['columns'] = list(df.columns)
+        request.session['original_filename'] = f"{dataset_name}.csv"
+        
+        # Transform the data without encoding the target column yet
+        transformed_df = transform(df)
+        request.session['transformed_data'] = transformed_df.to_json(orient='split', date_format='iso')
+        
+        # Force session save
+        request.session.modified = True
+        
+        # Round numeric columns to 2 decimal places in the description
+        description = df.describe().round(2).to_html()
+        
+        return JsonResponse({
+            'success': True,
+            'columns': list(df.columns),
+            'description': description,
+            'plots': [],  # Add any plots you want to show
+            'message': 'Dataset loaded successfully'
+        })
+        
+    except FileNotFoundError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Sample dataset file not found'
+        }, status=404)
+    except Exception as e:
+        print(f"Error loading sample dataset: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Error loading dataset: {str(e)}'
+        }, status=500)

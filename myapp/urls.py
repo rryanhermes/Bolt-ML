@@ -19,4 +19,5 @@ urlpatterns = [
     path('blog/', views.blog, name='blog'),
     path('about/', views.about, name='about'),
     path('newsletter-signup/', views.newsletter_signup, name='newsletter_signup'),
+    path('get-sample-dataset/<str:dataset_name>/', views.get_sample_dataset, name='get_sample_dataset'),
 ]

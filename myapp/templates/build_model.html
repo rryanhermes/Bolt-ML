@@ -16,6 +16,45 @@
     </div>
     <input type="file" id="file-input" accept=".csv" style="display: none;">
     
+    <!-- Sample Datasets Section -->
+    <div style="margin-top: 2rem; text-align: center;">
+        <h3 style="color: #9ca3af; font-size: 1.2rem; font-weight: 500; margin-bottom: 1.5rem;">or try a sample dataset</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 0 auto; max-width: 1000px; padding: 0 2rem;">
+            <div class="sample-card" style="background: #1a1a1a; border: 2px solid #2d2d2d; border-radius: 12px; padding: 2rem; cursor: pointer; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+                 onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#f97316'; this.style.boxShadow='0 8px 12px rgba(0, 0, 0, 0.2)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#2d2d2d'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'"
+                 data-dataset="titanic">
+                <h4 style="color: white; margin: 0 0 1rem 0; font-size: 1.4rem; font-weight: 600;">Titanic Dataset</h4>
+                <p style="color: #f97316; margin: 0 0 1.5rem 0; font-size: 1rem;">Predict passenger survival</p>
+                <span style="display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.1); color: #9ca3af; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 20px; margin-top: auto;">
+                    📊 891 rows
+                </span>
+            </div>
+            
+            <div class="sample-card" style="background: #1a1a1a; border: 2px solid #2d2d2d; border-radius: 12px; padding: 2rem; cursor: pointer; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+                 onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#f97316'; this.style.boxShadow='0 8px 12px rgba(0, 0, 0, 0.2)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#2d2d2d'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'"
+                 data-dataset="housing">
+                <h4 style="color: white; margin: 0 0 1rem 0; font-size: 1.4rem; font-weight: 600;">Housing Prices</h4>
+                <p style="color: #f97316; margin: 0 0 1.5rem 0; font-size: 1rem;">Predict house prices</p>
+                <span style="display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.1); color: #9ca3af; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 20px; margin-top: auto;">
+                    📊 1460 rows
+                </span>
+            </div>
+            
+            <div class="sample-card" style="background: #1a1a1a; border: 2px solid #2d2d2d; border-radius: 12px; padding: 2rem; cursor: pointer; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+                 onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#f97316'; this.style.boxShadow='0 8px 12px rgba(0, 0, 0, 0.2)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#2d2d2d'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'"
+                 data-dataset="credit">
+                <h4 style="color: white; margin: 0 0 1rem 0; font-size: 1.4rem; font-weight: 600;">Credit Risk</h4>
+                <p style="color: #f97316; margin: 0 0 1.5rem 0; font-size: 1rem;">Predict credit defaults</p>
+                <span style="display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.1); color: #9ca3af; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 20px; margin-top: auto;">
+                    📊 1000 rows
+                </span>
+            </div>
+        </div>
+    </div>
+    
     <!-- Add validation status display -->
     <div id="validation-status" style="display: none;" class="validation-status">
         <div class="validation-icon"></div>
@@ -84,6 +123,7 @@
         <p class="accuracy-display">Model Accuracy: <span id="model-accuracy" class="accuracy-value"></span></p>
         
         <div class="options-container">
+            {% if not request.user.userprofile.is_premium %}
             <!-- Free Download Option -->
             <div class="option-card free">
                 <h3>Download Model</h3>
@@ -95,60 +135,104 @@
                     Download Model
                 </button>
             </div>
+            {% endif %}
             
             <!-- Premium Option -->
-            <div class="option-card premium">
+            <div class="option-card premium" {% if request.user.userprofile.is_premium %}style="width: 100%;"{% endif %}>
                 <div class="premium-badge">PREMIUM</div>
                 <h3>Enhance Performance</h3>
-                {% if request.user.userprofile.is_premium %}
-                    <p>Configure advanced optimization techniques to improve your model's accuracy:</p>
-                    <form id="enhance-config" class="enhance-form">
-                        <div class="enhance-options">
-                            <div class="enhance-option">
-                                <label>
-                                    <input type="checkbox" name="feature_engineering" checked>
-                                    Advanced Feature Engineering
-                                </label>
-                                <span class="option-description">Automatically create and select the best features</span>
+                
+                <!-- Mini Dashboard -->
+                <div class="mini-dashboard">
+                    <!-- Dashboard Content -->
+                    <div class="metrics-section">
+                        <h4>Current Performance</h4>
+                        <div class="metrics-grid">
+                            <div class="metric-card primary">
+                                <span class="metric-label">{{ evaluation_metric|upper }}</span>
+                                <span class="metric-value" id="primary-metric">{{ score|floatformat:4 }}</span>
                             </div>
-                            <div class="enhance-option">
-                                <label>
-                                    <input type="checkbox" name="hyperparameter_opt" checked>
-                                    Hyperparameter Optimization
-                                </label>
-                                <span class="option-description">Find optimal model parameters</span>
+                            <div class="metric-card">
+                                <span class="metric-label">PRECISION</span>
+                                <span class="metric-value" id="precision-metric">0.0000</span>
                             </div>
-                            <div class="enhance-option">
-                                <label>
-                                    <input type="checkbox" name="ensemble" checked>
-                                    Ensemble Methods
-                                </label>
-                                <span class="option-description">Combine multiple models for better predictions</span>
+                            <div class="metric-card">
+                                <span class="metric-label">RECALL</span>
+                                <span class="metric-value" id="recall-metric">0.0000</span>
                             </div>
-                            <div class="enhance-option">
-                                <label>
-                                    <input type="checkbox" name="cross_validation" checked>
-                                    Cross-validation
-                                </label>
-                                <span class="option-description">Ensure model reliability and prevent overfitting</span>
+                            <div class="metric-card">
+                                <span class="metric-label">F1 SCORE</span>
+                                <span class="metric-value" id="f1-metric">0.0000</span>
                             </div>
                         </div>
-                        <button onclick="improveModel()" style="width: 100%; padding: 0.875rem; background: linear-gradient(to right, var(--orange), var(--red)); color: var(--actual-white); text-decoration: none; border-radius: 12px; font-weight: 500; transition: all 0.3s; border: none; outline: none; position: relative; overflow: hidden; cursor: pointer; margin-top: 1rem;">
-                            Start Enhancement
-                        </button>
-                    </form>
-                {% else %}
-                    <p>Unlock advanced optimization techniques to improve your model's accuracy by up to 30%!</p>
-                    <ul>
-                        <li>Advanced feature engineering</li>
-                        <li>Hyperparameter optimization</li>
-                        <li>Ensemble methods</li>
-                        <li>Cross-validation</li>
-                    </ul>
-                    <button onclick="window.location.href='/premium'" class="btn premium-btn">
-                        Upgrade & Improve
+                    </div>
+
+                    {% if not request.user.userprofile.is_premium %}
+                    <div class="premium-overlay">
+                        <div class="premium-blur"></div>
+                        <div class="premium-prompt">
+                            <span class="premium-icon">⭐</span>
+                            <h4>Unlock Advanced Analytics</h4>
+                            <p>Upgrade to Premium to access detailed metrics and enhanced model optimization</p>
+                            <a href="{% url 'premium' %}" class="premium-upgrade-btn">Upgrade Now</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Optimization Control -->
+                    <div class="optimization-section">
+                        <h4>Optimization Level</h4>
+                        <div class="slider-container">
+                            <input type="range" id="optimization-slider" min="1" max="5" value="3" class="optimization-slider">
+                            <div class="slider-labels">
+                                <span>Faster</span>
+                                <span>Balanced</span>
+                                <span>Better</span>
+                            </div>
+                        </div>
+                        <div class="optimization-stats">
+                            <div class="stat">
+                                <span class="stat-label">Est. Time</span>
+                                <span class="stat-value" id="est-time">5-10 min</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Potential Gain</span>
+                                <span class="stat-value" id="potential-gain">+15-25%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Options -->
+                    <div class="export-section">
+                        <h4>Export Results</h4>
+                        <div class="export-buttons">
+                            <button class="export-btn excel">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M21.17 3.25H2.83c-.46 0-.83.37-.83.82v15.85c0 .45.37.82.83.82h18.34c.46 0 .83-.37.83-.82V4.07c0-.45-.37-.82-.83-.82zM8 17.5H3.5v-2H8v2zm0-3.5H3.5V12H8v2zm0-3.5H3.5V8.5H8v2zm12.5 7h-11v-2h11v2zm0-3.5h-11V12h11v2zm0-3.5h-11V8.5h11v2z"/>
+                                </svg>
+                                Excel
+                            </button>
+                            <button class="export-btn sheets">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.34 3-3 3s-3-1.34-3-3H5V5h14v10z"/>
+                                </svg>
+                                Sheets
+                            </button>
+                            <button class="export-btn kaggle">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6z"/>
+                                </svg>
+                                Kaggle
+                            </button>
+                        </div>
+                    </div>
+
+                    {% if request.user.userprofile.is_premium %}
+                    <button onclick="improveModel()" class="improve-model-btn">
+                        Start Enhancement
                     </button>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -402,63 +486,147 @@
             document.getElementById('build-model-btn').disabled = !isValid;
         }
 
-        function improveModel() {
-            event.preventDefault(); // Prevent form submission
+        // Update optimization stats based on slider value
+        $('#optimization-slider').on('input', function() {
+            const value = parseInt($(this).val());
+            let time, gain;
             
-            // Show loading state
+            switch(value) {
+                case 1:
+                    time = "2-5 min";
+                    gain = "+5-10%";
+                    break;
+                case 2:
+                    time = "5-10 min";
+                    gain = "+10-15%";
+                    break;
+                case 3:
+                    time = "10-15 min";
+                    gain = "+15-25%";
+                    break;
+                case 4:
+                    time = "15-25 min";
+                    gain = "+20-30%";
+                    break;
+                case 5:
+                    time = "25-40 min";
+                    gain = "+25-40%";
+                    break;
+            }
+            
+            $('#est-time').text(time);
+            $('#potential-gain').text(gain);
+        });
+
+        // Export functionality
+        $('.export-btn.excel').on('click', function() {
+            if (!modelBlob) {
+                alert('Please wait for the model to finish building before exporting.');
+                return;
+            }
+            exportResults('excel');
+        });
+
+        $('.export-btn.sheets').on('click', function() {
+            if (!modelBlob) {
+                alert('Please wait for the model to finish building before exporting.');
+                return;
+            }
+            exportResults('sheets');
+        });
+
+        $('.export-btn.kaggle').on('click', function() {
+            if (!modelBlob) {
+                alert('Please wait for the model to finish building before exporting.');
+                return;
+            }
+            exportResults('kaggle');
+        });
+
+        function exportResults(format) {
+            const metrics = {
+                primary: $('#primary-metric').text(),
+                precision: $('#precision-metric').text(),
+                recall: $('#recall-metric').text(),
+                f1: $('#f1-metric').text()
+            };
+
+            // For now, show a coming soon message
+            alert(`Export to ${format} coming soon!\nThis will export your model metrics:\n` +
+                  `Primary Metric: ${metrics.primary}\n` +
+                  `Precision: ${metrics.precision}\n` +
+                  `Recall: ${metrics.recall}\n` +
+                  `F1 Score: ${metrics.f1}`);
+        }
+
+        function improveModel() {
+            event.preventDefault();
+            
+            const optimizationLevel = $('#optimization-slider').val();
             const button = event.target;
             const originalText = button.textContent;
+            
             button.textContent = 'Analyzing...';
             button.disabled = true;
             
-            // Get selected options
-            const options = {
-                feature_engineering: document.querySelector('input[name="feature_engineering"]').checked,
-                hyperparameter_opt: document.querySelector('input[name="hyperparameter_opt"]').checked,
-                ensemble: document.querySelector('input[name="ensemble"]').checked,
-                cross_validation: document.querySelector('input[name="cross_validation"]').checked
-            };
-            
-            // For now, just show a message that this feature is coming soon
+            // For now, show a coming soon message
             setTimeout(() => {
-                const selectedOptions = Object.entries(options)
-                    .filter(([_, value]) => value)
-                    .map(([key, _]) => key.replace('_', ' '))
-                    .join(', ');
-                
-                alert(`Model improvement feature coming soon!\nSelected optimizations: ${selectedOptions}\nOur AI will analyze your model and apply the selected optimizations to improve its performance.`);
+                alert(`Model improvement feature coming soon!\n\n` +
+                      `Optimization Level: ${optimizationLevel}\n` +
+                      `Estimated Time: ${$('#est-time').text()}\n` +
+                      `Potential Gain: ${$('#potential-gain').text()}\n\n` +
+                      `Our AI will analyze your model and apply optimizations to improve its performance.`);
+                      
                 button.textContent = originalText;
                 button.disabled = false;
             }, 1500);
+        }
+
+        // Sample dataset handling
+        $('.sample-card').on('click', function() {
+            const dataset = $(this).data('dataset');
+            showLoading();
             
-            // TODO: When backend is ready, make API call with selected options
-            /*
-            fetch('/improve-model/', {
-                method: 'POST',
+            fetch(`/get-sample-dataset/${dataset}/`, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(options)
+                    'X-CSRFToken': csrftoken
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load sample dataset');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    // Update UI with improved model metrics
+                    $('#validation-status').hide();
+                    $('#result').html(data.description);
+                    data.plots.forEach(function(plot) {
+                        $('#result').append(plot);
+                    });
+                    
+                    const targetSelect = $('#target-column');
+                    targetSelect.empty();
+                    data.columns.forEach(function(column) {
+                        targetSelect.append($('<option>', {
+                            value: column,
+                            text: column
+                        }));
+                    });
+                    $('#ml-form').show();
+                    document.getElementById('build-model-btn').disabled = false;
                 } else {
-                    throw new Error(data.error || 'Failed to improve model');
+                    showValidationStatus(false, data.message || 'Failed to load sample dataset');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Error improving model: ' + error);
+                showValidationStatus(false, error.message);
             })
             .finally(() => {
-                button.textContent = originalText;
-                button.disabled = false;
+                hideLoading();
             });
-            */
-        }
+        });
     });
 </script>
 {% endblock %}
@@ -474,6 +642,95 @@
         font-weight: 600;
     }
     
+    /* Premium styles */
+    .mini-dashboard {
+        position: relative;
+        background: var(--dark);
+        border-radius: 12px;
+        padding: 2rem;
+        overflow: hidden;
+    }
+
+    .premium-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .premium-blur {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .premium-prompt {
+        position: relative;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 80%;
+        z-index: 2;
+    }
+
+    .premium-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: white;
+        color: var(--orange);
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        z-index: 3;
+    }
+
+    .premium-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .premium-prompt h4 {
+        margin: 0.5rem 0;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .premium-prompt p {
+        margin: 1rem 0;
+        color: var(--off-white);
+    }
+
+    .premium-upgrade-btn {
+        display: inline-block;
+        background: var(--orange);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 1rem;
+        transition: background 0.2s;
+    }
+
+    .premium-upgrade-btn:hover {
+        background: var(--orange-dark);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Rest of existing styles */
     .validation-status.invalid {
         background-color: rgba(239, 68, 68, 0.15);
         border: 2px solid var(--red);
@@ -553,5 +810,112 @@
 
     .enhance-form {
         margin-top: 1rem;
+    }
+
+    .sample-datasets {
+        margin-top: 2rem;
+        text-align: center;
+        padding: 0 2rem;
+    }
+
+    .sample-datasets h3 {
+        color: var(--off-white);
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .sample-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin: 0 auto;
+        max-width: 1000px;
+    }
+
+    .sample-card {
+        background: var(--dark);
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sample-card:hover {
+        border-color: var(--orange);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .sample-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--orange), var(--orange-dark));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sample-card:hover::before {
+        opacity: 1;
+    }
+
+    .sample-card h4 {
+        color: var(--white);
+        margin: 0 0 1rem 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+
+    .sample-card p {
+        color: var(--orange);
+        background: var(--dark);
+        margin: 0 0 1.5rem 0;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .dataset-size {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--off-white);
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        margin-top: auto;
+    }
+
+    .dataset-size::before {
+        content: '📊';
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+        .sample-cards {
+            grid-template-columns: 1fr;
+            max-width: 400px;
+            gap: 1rem;
+        }
+
+        .sample-datasets {
+            padding: 0 1rem;
+        }
+
+        .sample-card {
+            padding: 1.5rem;
+        }
     }
 </style>

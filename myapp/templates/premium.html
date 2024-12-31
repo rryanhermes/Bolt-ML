@@ -30,7 +30,7 @@
                 </div>
                 
                 <!-- Cancel Subscription Button -->
-                <button onclick="cancelSubscription()" style="width: 100%; padding: 1rem; font-size: 1.1rem; background: var(--gray-dark); color: var(--off-white); border: 1px solid var(--red); border-radius: 12px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                <button data-action="cancel" style="width: 100%; padding: 1rem; font-size: 1.1rem; background: var(--gray-dark); color: var(--off-white); border: 1px solid var(--red); border-radius: 12px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
                     Cancel Subscription
                 </button>
             </div>
@@ -78,7 +78,7 @@
                 </ul>
                 
                 <!-- Upgrade Button -->
-                <button style="width: 100%; padding: 1.2rem; font-size: 1.2rem; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(243, 146, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(243, 146, 0, 0.2)';">
+                <button data-action="upgrade" style="width: 100%; padding: 1.2rem; font-size: 1.2rem; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(243, 146, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(243, 146, 0, 0.2)';">
                     Upgrade Now
                 </button>
             </div>
@@ -86,6 +86,7 @@
     {% endif %}
 
     <!-- Features Grid -->
+    {% if not request.user.userprofile.is_premium %}
     <div style="margin-top: 4rem;">
         <h2 style="text-align: center; color: var(--orange); font-size: 2rem; margin-bottom: 3rem;">Premium Features</h2>
         
@@ -131,6 +132,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 {% endblock %}
@@ -138,19 +140,21 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        {% if not request.user.userprofile.is_premium %}
-        const upgradeBtn = document.querySelector('button');
-        
-        upgradeBtn.addEventListener('click', async function() {
-            alert('Premium upgrade feature coming soon! Please check back later.');
-        });
-        {% endif %}
-    });
-
-    function cancelSubscription() {
-        if (confirm('Are you sure you want to cancel your premium subscription? You will lose access to premium features at the end of your billing period.')) {
-            alert('Subscription cancellation feature coming soon! Please contact support to cancel your subscription.');
+        const upgradeBtn = document.querySelector('button[data-action="upgrade"]');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', async function() {
+                alert('Premium upgrade feature coming soon! Please check back later.');
+            });
         }
-    }
+
+        const cancelBtn = document.querySelector('button[data-action="cancel"]');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to cancel your premium subscription? You will lose access to premium features at the end of your billing period.')) {
+                    alert('Subscription cancellation feature coming soon! Please contact support to cancel your subscription.');
+                }
+            });
+        }
+    });
 </script>
 {% endblock %} 
