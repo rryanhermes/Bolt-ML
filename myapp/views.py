@@ -323,7 +323,9 @@ def build_model(request):
             'success': True,
             'model_id': user_model.id,
             'score': float(score),
-            'metric': metric_name
+            'metric': metric_name,
+            'model_url': f'/download-model/{user_model.id}/',
+            'filename': model_filename
         })
         
     except json.JSONDecodeError:

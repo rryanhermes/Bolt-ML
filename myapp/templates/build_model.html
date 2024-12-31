@@ -100,16 +100,55 @@
             <div class="option-card premium">
                 <div class="premium-badge">PREMIUM</div>
                 <h3>Enhance Performance</h3>
-                <p>Unlock advanced optimization techniques to improve your model's accuracy by up to 30%!</p>
-                <ul>
-                    <li>Advanced feature engineering</li>
-                    <li>Hyperparameter optimization</li>
-                    <li>Ensemble methods</li>
-                    <li>Cross-validation</li>
-                </ul>
-                <button onclick="window.location.href='/premium'" class="btn premium-btn">
-                    Upgrade & Improve
-                </button>
+                {% if request.user.userprofile.is_premium %}
+                    <p>Configure advanced optimization techniques to improve your model's accuracy:</p>
+                    <form id="enhance-config" class="enhance-form">
+                        <div class="enhance-options">
+                            <div class="enhance-option">
+                                <label>
+                                    <input type="checkbox" name="feature_engineering" checked>
+                                    Advanced Feature Engineering
+                                </label>
+                                <span class="option-description">Automatically create and select the best features</span>
+                            </div>
+                            <div class="enhance-option">
+                                <label>
+                                    <input type="checkbox" name="hyperparameter_opt" checked>
+                                    Hyperparameter Optimization
+                                </label>
+                                <span class="option-description">Find optimal model parameters</span>
+                            </div>
+                            <div class="enhance-option">
+                                <label>
+                                    <input type="checkbox" name="ensemble" checked>
+                                    Ensemble Methods
+                                </label>
+                                <span class="option-description">Combine multiple models for better predictions</span>
+                            </div>
+                            <div class="enhance-option">
+                                <label>
+                                    <input type="checkbox" name="cross_validation" checked>
+                                    Cross-validation
+                                </label>
+                                <span class="option-description">Ensure model reliability and prevent overfitting</span>
+                            </div>
+                        </div>
+                        <button onclick="improveModel()" style="width: 100%; padding: 0.875rem; background: linear-gradient(to right, var(--orange), var(--red)); color: var(--actual-white); text-decoration: none; border-radius: 12px; font-weight: 500; transition: all 0.3s; border: none; outline: none; position: relative; overflow: hidden; cursor: pointer; margin-top: 1rem;">
+                            Start Enhancement
+                        </button>
+                    </form>
+                {% else %}
+                    <p>Unlock advanced optimization techniques to improve your model's accuracy by up to 30%!</p>
+                    <ul>
+                        <li>Advanced feature engineering</li>
+                        <li>Hyperparameter optimization</li>
+                        <li>Ensemble methods</li>
+                        <li>Cross-validation</li>
+                    </ul>
+                    <button onclick="window.location.href='/premium'" class="btn premium-btn">
+                        Upgrade & Improve
+                    </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -276,6 +315,14 @@
                         data.score.toFixed(4)
                     );
                     $('#download-section').show();
+                    
+                    // Set the model blob and filename from the response
+                    fetch(data.model_url)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            modelBlob = blob;
+                            modelFilename = data.filename || 'model.' + $('#file-format').val();
+                        });
                 } else {
                     throw new Error(data.error || 'Failed to build model');
                 }
@@ -354,6 +401,64 @@
             validationStatus.querySelector('.validation-message').textContent = message;
             document.getElementById('build-model-btn').disabled = !isValid;
         }
+
+        function improveModel() {
+            event.preventDefault(); // Prevent form submission
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Analyzing...';
+            button.disabled = true;
+            
+            // Get selected options
+            const options = {
+                feature_engineering: document.querySelector('input[name="feature_engineering"]').checked,
+                hyperparameter_opt: document.querySelector('input[name="hyperparameter_opt"]').checked,
+                ensemble: document.querySelector('input[name="ensemble"]').checked,
+                cross_validation: document.querySelector('input[name="cross_validation"]').checked
+            };
+            
+            // For now, just show a message that this feature is coming soon
+            setTimeout(() => {
+                const selectedOptions = Object.entries(options)
+                    .filter(([_, value]) => value)
+                    .map(([key, _]) => key.replace('_', ' '))
+                    .join(', ');
+                
+                alert(`Model improvement feature coming soon!\nSelected optimizations: ${selectedOptions}\nOur AI will analyze your model and apply the selected optimizations to improve its performance.`);
+                button.textContent = originalText;
+                button.disabled = false;
+            }, 1500);
+            
+            // TODO: When backend is ready, make API call with selected options
+            /*
+            fetch('/improve-model/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(options)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI with improved model metrics
+                } else {
+                    throw new Error(data.error || 'Failed to improve model');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error improving model: ' + error);
+            })
+            .finally(() => {
+                button.textContent = originalText;
+                button.disabled = false;
+            });
+            */
+        }
     });
 </script>
 {% endblock %}
@@ -409,5 +514,44 @@
         .form-grid {
             grid-template-columns: 1fr;
         }
+    }
+
+    .enhance-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    .enhance-option {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .enhance-option label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--white);
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .enhance-option input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        accent-color: var(--orange);
+        cursor: pointer;
+    }
+
+    .option-description {
+        color: var(--off-white);
+        font-size: 0.9rem;
+        margin-left: 1.7rem;
+    }
+
+    .enhance-form {
+        margin-top: 1rem;
     }
 </style>

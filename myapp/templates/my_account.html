@@ -9,6 +9,14 @@
     <div class="account-header">
         <h2 class="account-title">My Account</h2>
         <div class="username">{{ request.user.username }}</div>
+        {% if request.user.userprofile.is_premium %}
+            <div style="margin-top: 1rem; display: inline-block; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+                Premium Member
+                {% if request.user.userprofile.premium_since %}
+                    since {{ request.user.userprofile.premium_since|date:"M d, Y" }}
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 
     <div class="account-info">
@@ -24,7 +32,35 @@
             <span class="info-label">Total Models</span>
             <span class="info-value">{{ total_models }}</span>
         </div>
+        <div class="info-row">
+            <span class="info-label">Account Type</span>
+            <span class="info-value" style="display: flex; align-items: center; gap: 0.5rem;">
+                {% if request.user.userprofile.is_premium %}
+                    <span style="color: var(--orange); font-weight: 600;">Premium</span>
+                    <span style="color: var(--off-white); font-size: 0.9rem;">
+                        (Full access to all features)
+                    </span>
+                {% else %}
+                    <span>Free</span>
+                    <a href="{% url 'premium' %}" style="color: var(--orange); text-decoration: none; font-size: 0.9rem; margin-left: 0.5rem;">
+                        Upgrade to Premium →
+                    </a>
+                {% endif %}
+            </span>
+        </div>
     </div>
+
+    {% if not request.user.userprofile.is_premium %}
+        <div style="margin: 2rem 0; padding: 1.5rem; background: rgba(243, 146, 0, 0.1); border-radius: 12px; text-align: center;">
+            <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.2rem;">Upgrade to Premium</h3>
+            <p style="color: var(--off-white); margin-bottom: 1.5rem; line-height: 1.6;">
+                Get access to advanced features like hyperparameter optimization, ensemble methods, and more.
+            </p>
+            <a href="{% url 'premium' %}" style="display: inline-block; padding: 0.8rem 1.6rem; background: var(--orange); color: var(--actual-white); text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
+                View Premium Features
+            </a>
+        </div>
+    {% endif %}
 
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}

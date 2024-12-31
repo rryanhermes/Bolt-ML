@@ -2,56 +2,88 @@
 {% load static %}
 
 {% block content %}
-<div class="page-title">Upgrade to BoltML Premium</div>
+<div class="page-title">
+    {% if request.user.userprofile.is_premium %}
+        Your Premium Subscription
+    {% else %}
+        Upgrade to BoltML Premium
+    {% endif %}
+</div>
 
 <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
-    <!-- Premium Plan Card -->
-    <div class="card" style="max-width: 500px; margin: 0 auto 3rem; text-align: center; position: relative; overflow: hidden;">
-        <!-- Gradient Background -->
-        <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
-        
-        <!-- Content -->
-        <div style="position: relative; z-index: 1;">
-            <h2 style="color: var(--orange); font-size: 1.5rem; margin-bottom: 1rem;">Premium Plan</h2>
+    {% if request.user.userprofile.is_premium %}
+        <!-- Premium Status Card -->
+        <div class="card" style="max-width: 500px; margin: 0 auto 3rem; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
             
-            <!-- Price -->
-            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="font-size: 4rem; color: var(--white); font-weight: 800;">
-                    <span style="font-size: 2rem; vertical-align: super;">$</span>10
-                    <span style="font-size: 1.25rem; color: var(--off-white);">/month</span>
+            <div style="position: relative; z-index: 1;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🌟</div>
+                <h2 style="color: var(--orange); font-size: 1.5rem; margin-bottom: 1rem;">Active Premium Subscription</h2>
+                
+                <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="color: var(--white); margin-bottom: 1rem;">
+                        Member since {{ request.user.userprofile.premium_since|date:"F j, Y" }}
+                    </div>
+                    <div style="color: var(--off-white);">
+                        Next billing date: {{ request.user.userprofile.premium_since|date:"F j, Y" }}
+                    </div>
                 </div>
+                
+                <!-- Cancel Subscription Button -->
+                <button onclick="cancelSubscription()" style="width: 100%; padding: 1rem; font-size: 1.1rem; background: var(--gray-dark); color: var(--off-white); border: 1px solid var(--red); border-radius: 12px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                    Cancel Subscription
+                </button>
             </div>
-            
-            <!-- Features List -->
-            <ul style="list-style: none; padding: 0; margin: 0 0 2rem 0; text-align: left;">
-                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
-                    Advanced Feature Engineering
-                </li>
-                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
-                    Hyperparameter Optimization
-                </li>
-                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
-                    Ensemble Methods
-                </li>
-                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
-                    Cross-validation
-                </li>
-                <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                    <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
-                    Priority Support
-                </li>
-            </ul>
-            
-            <!-- Upgrade Button -->
-            <button style="width: 100%; padding: 1.2rem; font-size: 1.2rem; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(243, 146, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(243, 146, 0, 0.2)';">
-                Upgrade Now
-            </button>
         </div>
-    </div>
+    {% else %}
+        <!-- Premium Plan Card -->
+        <div class="card" style="max-width: 500px; margin: 0 auto 3rem; text-align: center; position: relative; overflow: hidden;">
+            <!-- Gradient Background -->
+            <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+            
+            <!-- Content -->
+            <div style="position: relative; z-index: 1;">
+                <h2 style="color: var(--orange); font-size: 1.5rem; margin-bottom: 1rem;">Premium Plan</h2>
+                
+                <!-- Price -->
+                <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="font-size: 4rem; color: var(--white); font-weight: 800;">
+                        <span style="font-size: 2rem; vertical-align: super;">$</span>10
+                        <span style="font-size: 1.25rem; color: var(--off-white);">/month</span>
+                    </div>
+                </div>
+                
+                <!-- Features List -->
+                <ul style="list-style: none; padding: 0; margin: 0 0 2rem 0; text-align: left;">
+                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                        Advanced Feature Engineering
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                        Hyperparameter Optimization
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                        Ensemble Methods
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                        Cross-validation
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
+                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                        Priority Support
+                    </li>
+                </ul>
+                
+                <!-- Upgrade Button -->
+                <button style="width: 100%; padding: 1.2rem; font-size: 1.2rem; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(243, 146, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(243, 146, 0, 0.2)';">
+                    Upgrade Now
+                </button>
+            </div>
+        </div>
+    {% endif %}
 
     <!-- Features Grid -->
     <div style="margin-top: 4rem;">
@@ -106,11 +138,19 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        {% if not request.user.userprofile.is_premium %}
         const upgradeBtn = document.querySelector('button');
         
         upgradeBtn.addEventListener('click', async function() {
             alert('Premium upgrade feature coming soon! Please check back later.');
         });
+        {% endif %}
     });
+
+    function cancelSubscription() {
+        if (confirm('Are you sure you want to cancel your premium subscription? You will lose access to premium features at the end of your billing period.')) {
+            alert('Subscription cancellation feature coming soon! Please contact support to cancel your subscription.');
+        }
+    }
 </script>
 {% endblock %} 
