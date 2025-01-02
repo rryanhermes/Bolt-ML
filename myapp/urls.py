@@ -24,4 +24,4 @@ urlpatterns = [
     path('api/predict/', views.predict, name='predict'),
 ]
 
-ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app']
+ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app', 'boltml.onrender.com']

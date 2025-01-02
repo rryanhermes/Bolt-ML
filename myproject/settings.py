@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-k+@_-pluc&+i5+2y#^0j%^1+igvw@05p2gc3d#h#pvvlo&n2xm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app']
+ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app', 'boltml.onrender.com']
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
 
