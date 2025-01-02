@@ -2,11 +2,14 @@
 # exit on error
 set -o errexit
 
-# Install dependencies
+echo "Installing dependencies..."
 pip install -r requirements.txt
 
-# Collect static files
+echo "Running database migrations..."
+python manage.py migrate --noinput
+
+echo "Collecting static files..."
 python manage.py collectstatic --no-input
 
-# Run migrations
-python manage.py migrate 
+echo "Creating superuser..."
+python manage.py createsuperuser --noinput --username admin --email admin@example.com || true 

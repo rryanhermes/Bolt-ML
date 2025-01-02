@@ -19,6 +19,7 @@ media/
 
 # Environment
 .env
+.env.*
 venv/
 env/
 .venv/
@@ -27,7 +28,6 @@ env/
 *.pyc
 __pycache__
 /staticfiles
-.env
 *.pyo
 *.pyd
 .Python

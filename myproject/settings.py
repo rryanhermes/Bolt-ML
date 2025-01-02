@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%^1+igvw@05p2gc3d#h#pvvlo&n2xm')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app', 'boltml.onrender.com']
+ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app', 'boltml.onrender.com', 'localhost', '127.0.0.1']
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
 
@@ -83,7 +87,9 @@ if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True
         )
     }
 else:
@@ -147,20 +153,20 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'WARNING',
             'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
         },
     },
 }
