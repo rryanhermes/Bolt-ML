@@ -20,4 +20,8 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('newsletter-signup/', views.newsletter_signup, name='newsletter_signup'),
     path('get-sample-dataset/<str:dataset_name>/', views.get_sample_dataset, name='get_sample_dataset'),
+    path('api/create-model/', views.create_model, name='create_model'),
+    path('api/predict/', views.predict, name='predict'),
 ]
+
+ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com']

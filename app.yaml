@@ -1,0 +1,29 @@
+runtime: custom
+env: flex
+
+env_variables:
+  DJANGO_SETTINGS_MODULE: 'myproject.settings'
+  PYTHONUNBUFFERED: 1
+  DEBUG: False
+  ALLOWED_HOSTS: '*'
+  GOOGLE_CLOUD_PROJECT: 'personal-website-395618'
+
+handlers:
+- url: /static
+  static_dir: static/
+  secure: always
+
+- url: /.*
+  script: auto
+  secure: always
+
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 2
+  target_concurrent_requests: 100

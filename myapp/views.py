@@ -24,6 +24,7 @@ from django.utils import timezone
 import pytz
 import plotly.express as px
 import plotly.graph_objects as go
+import io
 
 def login(request):
     if request.method == 'POST':
@@ -756,3 +757,57 @@ def get_sample_dataset(request, dataset_name):
             'success': False,
             'message': f'Error loading dataset: {str(e)}'
         }, status=500)
+
+@csrf_exempt
+def create_model(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            target_column = data['target_column']
+            problem_type = data['problem_type']
+            file_format = data.get('file_format', 'pkl')
+            
+            # Load and transform data
+            df = pd.read_json(request.session['df'])
+            X = transform(df.drop(target_column, axis=1))
+            y = df[target_column]
+            
+            # Train the model
+            model, accuracy = train_model(X, y, problem_type)
+            
+            # Save the model
+            buffer = io.BytesIO()
+            if file_format == 'joblib':
+                joblib.dump(model, buffer)
+            else:
+                pickle.dump(model, buffer)
+            buffer.seek(0)
+            
+            # Save model to file
+            model_path = f"models/{target_column}_{problem_type}.{file_format}"
+            with open(model_path, 'wb') as f:
+                f.write(buffer.getvalue())
+            
+            return JsonResponse({'success': True, 'accuracy': accuracy, 'model_path': model_path})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def predict(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            model_path = data['model_path']
+            input_data = pd.DataFrame(data['input_data'])
+            
+            # Load the model
+            model = joblib.load(model_path)
+            
+            # Make predictions
+            predictions = model.predict(input_data)
+            
+            return JsonResponse({'predictions': predictions.tolist()})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
