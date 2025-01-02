@@ -28,15 +28,28 @@ import io
 
 def login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            auth_login(request, user)  # Log the user in
-            return redirect('index')  # Redirect to the index or another page
-        else:
-            messages.error(request, "Invalid username or password.")
+        try:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            
+            if not username or not password:
+                messages.error(request, "Both username and password are required.")
+                return render(request, 'login.html')
+            
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                auth_login(request, user)
+                request.session.save()  # Explicitly save the session
+                return redirect('index')
+            else:
+                messages.error(request, "Invalid username or password.")
+                return render(request, 'login.html')
+                
+        except Exception as e:
+            print(f"Login error: {str(e)}")  # Add logging
+            messages.error(request, "An error occurred during login. Please try again.")
+            return render(request, 'login.html')
 
     return render(request, 'login.html')
 
