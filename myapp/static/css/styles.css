@@ -1,7 +1,7 @@
 /* CSS Variables */
 :root {
     /* Brand Colors */
-    --orange: #f3b200;
+    --orange: #f38a00;
     --red: #ef4444;
 
     /* Base Colors */
@@ -417,9 +417,10 @@ select.form-control {
 }
 
 .nav-logo {
-    width: 32px;
+    width: 70px;
     height: auto;
     margin-right: 8px;
+    padding: 0px, 0px;
 }
 
 /* Hero Section Styles */
@@ -1220,16 +1221,18 @@ select.form-control {
 
 .premium-badge {
     position: absolute;
-    top: -12px;
-    right: -12px;
+    top: -10px;
+    right: -25px;
     background: var(--white);
-    padding: 8px 16px;
+    padding: 8px 24px;
     border-radius: 24px;
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--orange);
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: rotate(25deg);
+    border: 1px solid rgba(249, 115, 22, 0.2);
 }
 
 .option-card h3 {
@@ -1521,4 +1524,165 @@ select.form-control {
 
 .export-btn svg {
     opacity: 0.8;
+}
+
+/* Premium Page Styles */
+.premium-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.premium-status-card {
+    max-width: 500px;
+    margin: 0 auto 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-gradient-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, var(--orange) 0%, transparent 100%);
+    opacity: 0.1;
+}
+
+.premium-card-content {
+    position: relative;
+    z-index: 1;
+}
+
+.premium-emoji {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.premium-status-title {
+    color: var(--orange);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.premium-membership-info {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.premium-since {
+    color: var(--white);
+    margin-bottom: 1rem;
+}
+
+.premium-next-billing {
+    color: var(--off-white);
+}
+
+.cancel-subscription-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    background: var(--gray-dark);
+    color: var(--red);
+    border: 1px solid var(--red);
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.premium-plan-price {
+    font-size: 4rem;
+    color: var(--white);
+    font-weight: 800;
+}
+
+.premium-price-currency {
+    font-size: 2rem;
+    vertical-align: super;
+}
+
+.premium-price-period {
+    font-size: 1.25rem;
+    color: var(--off-white);
+}
+
+.premium-features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+    text-align: left;
+}
+
+.premium-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--white);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.premium-feature-check {
+    color: var(--orange);
+    font-size: 1.2rem;
+}
+
+.upgrade-premium-btn {
+    width: 100%;
+    padding: 1.2rem;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--orange), #ff4d00);
+    color: var(--actual-white);
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);
+}
+
+.upgrade-premium-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(243, 146, 0, 0.3);
+}
+
+.premium-features-grid {
+    margin-top: 4rem;
+}
+
+.premium-features-title {
+    text-align: center;
+    color: var(--orange);
+    font-size: 2rem;
+    margin-bottom: 3rem;
+}
+
+.features-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.feature-grid-card {
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-grid-emoji {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.feature-grid-title {
+    color: var(--orange);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.feature-grid-description {
+    color: var(--off-white);
+    line-height: 1.6;
 }

@@ -10,75 +10,73 @@
     {% endif %}
 </div>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+<div class="premium-container">
     {% if request.user.userprofile.is_premium %}
         <!-- Premium Status Card -->
-        <div class="card" style="max-width: 500px; margin: 0 auto 3rem; text-align: center; position: relative; overflow: hidden;">
-            <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+        <div class="card premium-status-card">
+            <div class="premium-gradient-bg"></div>
             
-            <div style="position: relative; z-index: 1;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🌟</div>
-                <h2 style="color: var(--orange); font-size: 1.5rem; margin-bottom: 1rem;">Active Premium Subscription</h2>
+            <div class="premium-card-content">
+                <div class="premium-emoji">🌟</div>
+                <h2 class="premium-status-title">Active Premium Subscription</h2>
                 
-                <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <div style="color: var(--white); margin-bottom: 1rem;">
+                <div class="premium-membership-info">
+                    <div class="premium-since">
                         Member since {{ request.user.userprofile.premium_since|date:"F j, Y" }}
                     </div>
-                    <div style="color: var(--off-white);">
+                    <div class="premium-next-billing">
                         Next billing date: {{ request.user.userprofile.premium_since|date:"F j, Y" }}
                     </div>
                 </div>
                 
                 <!-- Cancel Subscription Button -->
-                <button data-action="cancel" style="width: 100%; padding: 1rem; font-size: 1.1rem; background: var(--gray-dark); color: var(--off-white); border: 1px solid var(--red); border-radius: 12px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                <button data-action="cancel" class="cancel-subscription-btn">
                     Cancel Subscription
                 </button>
             </div>
         </div>
     {% else %}
         <!-- Premium Plan Card -->
-        <div class="card" style="max-width: 500px; margin: 0 auto 3rem; text-align: center; position: relative; overflow: hidden;">
-            <!-- Gradient Background -->
-            <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
+        <div class="card premium-status-card">
+            <div class="premium-gradient-bg"></div>
             
-            <!-- Content -->
-            <div style="position: relative; z-index: 1;">
-                <h2 style="color: var(--orange); font-size: 1.5rem; margin-bottom: 1rem;">Premium Plan</h2>
+            <div class="premium-card-content">
+                <h2 class="premium-status-title">Premium Plan</h2>
                 
                 <!-- Price -->
-                <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <div style="font-size: 4rem; color: var(--white); font-weight: 800;">
-                        <span style="font-size: 2rem; vertical-align: super;">$</span>10
-                        <span style="font-size: 1.25rem; color: var(--off-white);">/month</span>
+                <div class="premium-membership-info">
+                    <div class="premium-plan-price">
+                        <span class="premium-price-currency">$</span>10
+                        <span class="premium-price-period">/month</span>
                     </div>
                 </div>
                 
                 <!-- Features List -->
-                <ul style="list-style: none; padding: 0; margin: 0 0 2rem 0; text-align: left;">
-                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                <ul class="premium-features-list">
+                    <li class="premium-feature-item">
+                        <span class="premium-feature-check">✓</span>
                         Advanced Feature Engineering
                     </li>
-                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    <li class="premium-feature-item">
+                        <span class="premium-feature-check">✓</span>
                         Hyperparameter Optimization
                     </li>
-                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    <li class="premium-feature-item">
+                        <span class="premium-feature-check">✓</span>
                         Ensemble Methods
                     </li>
-                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    <li class="premium-feature-item">
+                        <span class="premium-feature-check">✓</span>
                         Cross-validation
                     </li>
-                    <li style="display: flex; align-items: center; gap: 1rem; color: var(--white); margin-bottom: 1rem; font-size: 1.1rem;">
-                        <span style="color: var(--orange); font-size: 1.2rem;">✓</span>
+                    <li class="premium-feature-item">
+                        <span class="premium-feature-check">✓</span>
                         Priority Support
                     </li>
                 </ul>
                 
                 <!-- Upgrade Button -->
-                <button data-action="upgrade" style="width: 100%; padding: 1.2rem; font-size: 1.2rem; background: linear-gradient(135deg, var(--orange), #ff4d00); color: var(--actual-white); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(243, 146, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(243, 146, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(243, 146, 0, 0.2)';">
+                <button data-action="upgrade" class="upgrade-premium-btn">
                     Upgrade Now
                 </button>
             </div>
@@ -87,47 +85,47 @@
 
     <!-- Features Grid -->
     {% if not request.user.userprofile.is_premium %}
-    <div style="margin-top: 4rem;">
-        <h2 style="text-align: center; color: var(--orange); font-size: 2rem; margin-bottom: 3rem;">Premium Features</h2>
+    <div class="premium-features-grid">
+        <h2 class="premium-features-title">Premium Features</h2>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+        <div class="features-grid-container">
             <!-- Feature 1 -->
-            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
-                <div style="position: relative; z-index: 1;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
-                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Advanced Feature Engineering</h3>
-                    <p style="color: var(--off-white); line-height: 1.6;">Automatically discover and create optimal features from your data to improve model performance.</p>
+            <div class="card feature-grid-card">
+                <div class="premium-gradient-bg"></div>
+                <div class="premium-card-content">
+                    <div class="feature-grid-emoji">🚀</div>
+                    <h3 class="feature-grid-title">Advanced Feature Engineering</h3>
+                    <p class="feature-grid-description">Automatically discover and create optimal features from your data to improve model performance.</p>
                 </div>
             </div>
 
             <!-- Feature 2 -->
-            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
-                <div style="position: relative; z-index: 1;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
-                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Hyperparameter Optimization</h3>
-                    <p style="color: var(--off-white); line-height: 1.6;">Find the perfect model settings automatically using advanced optimization techniques.</p>
+            <div class="card feature-grid-card">
+                <div class="premium-gradient-bg"></div>
+                <div class="premium-card-content">
+                    <div class="feature-grid-emoji">⚡</div>
+                    <h3 class="feature-grid-title">Hyperparameter Optimization</h3>
+                    <p class="feature-grid-description">Find the perfect model settings automatically using advanced optimization techniques.</p>
                 </div>
             </div>
 
             <!-- Feature 3 -->
-            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
-                <div style="position: relative; z-index: 1;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
-                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Ensemble Methods</h3>
-                    <p style="color: var(--off-white); line-height: 1.6;">Combine multiple models to achieve higher accuracy and better predictions.</p>
+            <div class="card feature-grid-card">
+                <div class="premium-gradient-bg"></div>
+                <div class="premium-card-content">
+                    <div class="feature-grid-emoji">🎯</div>
+                    <h3 class="feature-grid-title">Ensemble Methods</h3>
+                    <p class="feature-grid-description">Combine multiple models to achieve higher accuracy and better predictions.</p>
                 </div>
             </div>
 
             <!-- Feature 4 -->
-            <div class="card" style="text-align: center; position: relative; overflow: hidden;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(45deg, var(--orange) 0%, transparent 100%); opacity: 0.1;"></div>
-                <div style="position: relative; z-index: 1;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-                    <h3 style="color: var(--orange); margin-bottom: 1rem; font-size: 1.3rem;">Cross-validation</h3>
-                    <p style="color: var(--off-white); line-height: 1.6;">Ensure your model's reliability with advanced validation techniques.</p>
+            <div class="card feature-grid-card">
+                <div class="premium-gradient-bg"></div>
+                <div class="premium-card-content">
+                    <div class="feature-grid-emoji">📊</div>
+                    <h3 class="feature-grid-title">Cross-validation</h3>
+                    <p class="feature-grid-description">Ensure your model's reliability with advanced validation techniques.</p>
                 </div>
             </div>
         </div>

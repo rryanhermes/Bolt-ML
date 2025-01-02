@@ -1,0 +1,3 @@
+PassengerId,Survived,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked
+1000,1,1,4,female,34,1,0,113783,106.55,C103,S
+1001,0,3,3,female,16,0,1,A/5. 2151,108.05,C103,S

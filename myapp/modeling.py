@@ -1,7 +1,15 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler, RobustScaler
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
+from sklearn.metrics import (
+    accuracy_score, 
+    mean_squared_error, 
+    r2_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score
+)
 from sklearn.feature_selection import SelectFromModel
 import pandas as pd
 import numpy as np
@@ -40,9 +48,9 @@ def transform(data, target_column=None, problem_type='classification'):
             
             # Handle missing values first
             if null_count > 0:
-                # For high cardinality, use a special "MISSING" category
+                # For high cardinality, use a special "NaN" category
                 if unique_count > 10:
-                    df[col] = df[col].fillna("MISSING")
+                    df[col] = df[col].fillna("NaN")
                 else:
                     df[col] = df[col].fillna(df[col].mode()[0])
             
@@ -101,6 +109,20 @@ class ModelWrapper:
         if self.label_encoder and self.problem_type == 'classification':
             return self.label_encoder.inverse_transform(predictions)
         return predictions
+        
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        return {
+            'model': self.model,
+            'label_encoder': self.label_encoder,
+            'problem_type': self.problem_type
+        }
+    
+    def __setstate__(self, state):
+        """Restore state from the unpickled state values."""
+        self.model = state['model']
+        self.label_encoder = state['label_encoder']
+        self.problem_type = state['problem_type']
 
 def train_model(X, y, problem_type, evaluation_metric='accuracy'):
     """Train a model based on the problem type and evaluation metric."""
@@ -122,18 +144,22 @@ def train_model(X, y, problem_type, evaluation_metric='accuracy'):
         # Get predictions
         y_pred = model.predict(X_test)
         
-        # Calculate metric based on evaluation_metric parameter
+        # Calculate all classification metrics
+        metrics = {
+            'precision': precision_score(y_test, y_pred, average='weighted'),
+            'recall': recall_score(y_test, y_pred, average='weighted'),
+            'f1': f1_score(y_test, y_pred, average='weighted')
+        }
+        
+        # Calculate primary metric based on evaluation_metric parameter
         if evaluation_metric == 'accuracy':
             score = accuracy_score(y_test, y_pred)
         elif evaluation_metric == 'precision':
-            from sklearn.metrics import precision_score
-            score = precision_score(y_test, y_pred, average='weighted')
+            score = metrics['precision']
         elif evaluation_metric == 'recall':
-            from sklearn.metrics import recall_score
-            score = recall_score(y_test, y_pred, average='weighted')
+            score = metrics['recall']
         elif evaluation_metric == 'f1':
-            from sklearn.metrics import f1_score
-            score = f1_score(y_test, y_pred, average='weighted')
+            score = metrics['f1']
         elif evaluation_metric == 'auc':
             from sklearn.metrics import roc_auc_score
             # For multi-class, we need to binarize the labels
@@ -150,6 +176,8 @@ def train_model(X, y, problem_type, evaluation_metric='accuracy'):
         
         # Wrap the model with the label encoder
         wrapped_model = ModelWrapper(model, label_encoder, 'classification')
+        
+        return wrapped_model, score, evaluation_metric, metrics
         
     elif problem_type.lower() == 'regression':
         # Train regressor
@@ -174,5 +202,5 @@ def train_model(X, y, problem_type, evaluation_metric='accuracy'):
         
         # Wrap the model without label encoder for regression
         wrapped_model = ModelWrapper(model, None, 'regression')
-    
-    return wrapped_model, score, evaluation_metric 
+        
+        return wrapped_model, score, evaluation_metric, None  # Return None for metrics in regression case 

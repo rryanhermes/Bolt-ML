@@ -70,7 +70,72 @@
 </div>
 
 <div class="result-section">
-    <div id="result" class="data-preview"></div>
+    <div id="result" class="data-preview">
+        <div class="dataset-tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="header">
+                    <svg viewBox="0 0 24 24" width="16" height="16" class="tab-icon">
+                        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                    </svg>
+                    Header
+                </button>
+                <button class="tab-button" data-tab="summary">
+                    <svg viewBox="0 0 24 24" width="16" height="16" class="tab-icon">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                        <path d="M7 12h2v5H7zm4-3h2v8h-2zm4-3h2v11h-2z"/>
+                    </svg>
+                    Summary
+                </button>
+                <button class="tab-button" data-tab="stats">
+                    <svg viewBox="0 0 24 24" width="16" height="16" class="tab-icon">
+                        <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                    </svg>
+                    Statistics
+                </button>
+                <button class="tab-button" data-tab="correlation">
+                    <svg viewBox="0 0 24 24" width="16" height="16" class="tab-icon">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                        <path d="M7 12h2v5H7zm4-3h2v8h-2zm4-3h2v11h-2z"/>
+                    </svg>
+                    Correlation
+                </button>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane active" id="header-tab">
+                    <div class="table-wrapper"></div>
+                </div>
+                <div class="tab-pane" id="summary-tab">
+                    <div class="summary-header">
+                        <div class="summary-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Rows</span>
+                                <span class="stat-value" id="summary-rows">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Columns</span>
+                                <span class="stat-value" id="summary-columns">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Memory Usage</span>
+                                <span class="stat-value" id="summary-memory">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <div class="summary-table">
+                            {{ dataset_insights.summary.table|safe }}
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="stats-tab">
+                    <div class="table-wrapper"></div>
+                </div>
+                <div class="tab-pane" id="correlation-tab">
+                    <div class="table-wrapper"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div id="ml-form" class="model-config" style="display: none;">
         <h3>Configure Your Model</h3>
@@ -141,98 +206,17 @@
             <div class="option-card premium" {% if request.user.userprofile.is_premium %}style="width: 100%;"{% endif %}>
                 <div class="premium-badge">PREMIUM</div>
                 <h3>Enhance Performance</h3>
+                <p>Use advanced AI techniques to automatically improve your model's performance.</p>
+                <p>Upgrade to Premium to access enhanced model optimization.</p>
+
                 
-                <!-- Mini Dashboard -->
-                <div class="mini-dashboard">
-                    <!-- Dashboard Content -->
-                    <div class="metrics-section">
-                        <h4>Current Performance</h4>
-                        <div class="metrics-grid">
-                            <div class="metric-card primary">
-                                <span class="metric-label">{{ evaluation_metric|upper }}</span>
-                                <span class="metric-value" id="primary-metric">{{ score|floatformat:4 }}</span>
-                            </div>
-                            <div class="metric-card">
-                                <span class="metric-label">PRECISION</span>
-                                <span class="metric-value" id="precision-metric">0.0000</span>
-                            </div>
-                            <div class="metric-card">
-                                <span class="metric-label">RECALL</span>
-                                <span class="metric-value" id="recall-metric">0.0000</span>
-                            </div>
-                            <div class="metric-card">
-                                <span class="metric-label">F1 SCORE</span>
-                                <span class="metric-value" id="f1-metric">0.0000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {% if not request.user.userprofile.is_premium %}
-                    <div class="premium-overlay">
-                        <div class="premium-blur"></div>
-                        <div class="premium-prompt">
-                            <span class="premium-icon">⭐</span>
-                            <h4>Unlock Advanced Analytics</h4>
-                            <p>Upgrade to Premium to access detailed metrics and enhanced model optimization</p>
-                            <a href="{% url 'premium' %}" class="premium-upgrade-btn">Upgrade Now</a>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Optimization Control -->
-                    <div class="optimization-section">
-                        <h4>Optimization Level</h4>
-                        <div class="slider-container">
-                            <input type="range" id="optimization-slider" min="1" max="5" value="3" class="optimization-slider">
-                            <div class="slider-labels">
-                                <span>Faster</span>
-                                <span>Balanced</span>
-                                <span>Better</span>
-                            </div>
-                        </div>
-                        <div class="optimization-stats">
-                            <div class="stat">
-                                <span class="stat-label">Est. Time</span>
-                                <span class="stat-value" id="est-time">5-10 min</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Potential Gain</span>
-                                <span class="stat-value" id="potential-gain">+15-25%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Export Options -->
-                    <div class="export-section">
-                        <h4>Export Results</h4>
-                        <div class="export-buttons">
-                            <button class="export-btn excel">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                    <path d="M21.17 3.25H2.83c-.46 0-.83.37-.83.82v15.85c0 .45.37.82.83.82h18.34c.46 0 .83-.37.83-.82V4.07c0-.45-.37-.82-.83-.82zM8 17.5H3.5v-2H8v2zm0-3.5H3.5V12H8v2zm0-3.5H3.5V8.5H8v2zm12.5 7h-11v-2h11v2zm0-3.5h-11V12h11v2zm0-3.5h-11V8.5h11v2z"/>
-                                </svg>
-                                Excel
-                            </button>
-                            <button class="export-btn sheets">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                    <path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.34 3-3 3s-3-1.34-3-3H5V5h14v10z"/>
-                                </svg>
-                                Sheets
-                            </button>
-                            <button class="export-btn kaggle">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6z"/>
-                                </svg>
-                                Kaggle
-                            </button>
-                        </div>
-                    </div>
-
-                    {% if request.user.userprofile.is_premium %}
-                    <button onclick="improveModel()" class="improve-model-btn">
-                        Start Enhancement
-                    </button>
-                    {% endif %}
-                </div>
+                {% if request.user.userprofile.is_premium %}
+                <button class="enhance-button" onclick="improveModel()">
+                    <span class="button-icon">⚡</span>
+                    Enhance Model
+                </button>
+                {% else %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -303,10 +287,7 @@
                     if (response.is_valid) {
                         // Hide validation status for valid files
                         $('#validation-status').hide();
-                        $('#result').html(response.description);
-                        response.plots.forEach(function(plot) {
-                            $('#result').append(plot);
-                        });
+                        updateDatasetInsights(response);
                         
                         const targetSelect = $('#target-column');
                         targetSelect.empty();
@@ -393,6 +374,13 @@
             })
             .then(data => {
                 if (data.success) {
+                    // Update all metrics
+                    $('#primary-metric').text(data.score.toFixed(4));
+                    $('#precision-metric').text(data.metrics?.precision?.toFixed(4) || '0.0000');
+                    $('#recall-metric').text(data.metrics?.recall?.toFixed(4) || '0.0000');
+                    $('#f1-metric').text(data.metrics?.f1?.toFixed(4) || '0.0000');
+                    
+                    // Update the model accuracy display
                     $('#model-accuracy').text(
                         data.metric === 'accuracy' ? 
                         (data.score * 100).toFixed(2) + '%' : 
@@ -486,38 +474,6 @@
             document.getElementById('build-model-btn').disabled = !isValid;
         }
 
-        // Update optimization stats based on slider value
-        $('#optimization-slider').on('input', function() {
-            const value = parseInt($(this).val());
-            let time, gain;
-            
-            switch(value) {
-                case 1:
-                    time = "2-5 min";
-                    gain = "+5-10%";
-                    break;
-                case 2:
-                    time = "5-10 min";
-                    gain = "+10-15%";
-                    break;
-                case 3:
-                    time = "10-15 min";
-                    gain = "+15-25%";
-                    break;
-                case 4:
-                    time = "15-25 min";
-                    gain = "+20-30%";
-                    break;
-                case 5:
-                    time = "25-40 min";
-                    gain = "+25-40%";
-                    break;
-            }
-            
-            $('#est-time').text(time);
-            $('#potential-gain').text(gain);
-        });
-
         // Export functionality
         $('.export-btn.excel').on('click', function() {
             if (!modelBlob) {
@@ -561,21 +517,16 @@
 
         function improveModel() {
             event.preventDefault();
-            
-            const optimizationLevel = $('#optimization-slider').val();
             const button = event.target;
             const originalText = button.textContent;
             
-            button.textContent = 'Analyzing...';
+            button.textContent = 'Enhancing...';
             button.disabled = true;
             
             // For now, show a coming soon message
             setTimeout(() => {
-                alert(`Model improvement feature coming soon!\n\n` +
-                      `Optimization Level: ${optimizationLevel}\n` +
-                      `Estimated Time: ${$('#est-time').text()}\n` +
-                      `Potential Gain: ${$('#potential-gain').text()}\n\n` +
-                      `Our AI will analyze your model and apply optimizations to improve its performance.`);
+                alert('Model enhancement feature coming soon!\n\n' +
+                      'Our AI will analyze your model and apply optimizations to improve its performance.');
                       
                 button.textContent = originalText;
                 button.disabled = false;
@@ -601,10 +552,7 @@
             .then(data => {
                 if (data.success) {
                     $('#validation-status').hide();
-                    $('#result').html(data.description);
-                    data.plots.forEach(function(plot) {
-                        $('#result').append(plot);
-                    });
+                    updateDatasetInsights(data);
                     
                     const targetSelect = $('#target-column');
                     targetSelect.empty();
@@ -626,6 +574,73 @@
             .finally(() => {
                 hideLoading();
             });
+        });
+
+        function updateDatasetInsights(data) {
+            // Clear all tab content first
+            $('.tab-pane .table-wrapper').empty();
+            
+            // Hide all tabs first
+            $('.tab-pane').hide();
+            
+            // Update header tab
+            if (data.dataset_insights.header) {
+                $('#header-tab .table-wrapper').html(data.dataset_insights.header);
+            }
+            
+            // Update summary tab
+            $('#summary-rows').text(data.dataset_insights.summary.rows);
+            $('#summary-columns').text(data.dataset_insights.summary.columns);
+            $('#summary-memory').text(data.dataset_insights.summary.memory_usage);
+            
+            // Ensure the summary table is populated
+            if (data.dataset_insights.summary.table) {
+                $('#summary-table').html(data.dataset_insights.summary.table);
+                $('#summary-table table').addClass('summary-table');
+            } else {
+                $('#summary-table').html('<p class="no-data">No summary data available.</p>');
+            }
+            
+            // Update statistics tab
+            if (data.dataset_insights.description) {
+                $('#stats-tab .table-wrapper').html(data.dataset_insights.description);
+            } else {
+                $('#stats-tab .table-wrapper').html('<p class="no-data">No numeric columns available for statistics.</p>');
+            }
+            
+            // Update correlation tab with heatmap
+            if (data.dataset_insights.correlation) {
+                $('#correlation-tab .table-wrapper').html(`
+                    <div class="correlation-wrapper">
+                        ${data.dataset_insights.correlation}
+                    </div>
+                `);
+            } else {
+                $('#correlation-tab .table-wrapper').html('<p class="no-data">No numeric columns available for correlation.</p>');
+            }
+            
+            // Show the dataset tabs container
+            $('.dataset-tabs').show();
+            
+            // Reset all tab buttons and show only the first tab
+            $('.tab-button').removeClass('active');
+            $('.tab-button').first().addClass('active');
+            $('#header-tab').show();
+        }
+
+        // Tab switching functionality
+        $('.tab-button').on('click', function() {
+            const tabId = $(this).data('tab');
+            
+            // Hide all tabs
+            $('.tab-pane').hide();
+            
+            // Show selected tab
+            $(`#${tabId}-tab`).show();
+            
+            // Update active button state
+            $('.tab-button').removeClass('active');
+            $(this).addClass('active');
         });
     });
 </script>
@@ -657,250 +672,77 @@
         left: 0;
         right: 0;
         bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .premium-blur {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        backdrop-filter: blur(8px);
-        background: rgba(0, 0, 0, 0.2);
-    }
-
-    .premium-prompt {
-        position: relative;
-        background: rgba(0, 0, 0, 0.85);
-        padding: 2rem;
-        border-radius: 12px;
+    .premium-content {
         text-align: center;
-        max-width: 80%;
-        z-index: 2;
+        padding: 2rem;
     }
 
-    .premium-badge {
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        background: white;
-        color: var(--orange);
-        padding: 4px 12px;
-        border-radius: 16px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        z-index: 3;
-    }
-
-    .premium-icon {
-        font-size: 2rem;
+    .premium-star {
+        font-size: 2.5rem;
         margin-bottom: 1rem;
         display: block;
     }
 
-    .premium-prompt h4 {
-        margin: 0.5rem 0;
+    .premium-content h4 {
+        color: #ffffff;
         font-size: 1.5rem;
-        color: white;
+        margin-bottom: 1rem;
     }
 
-    .premium-prompt p {
-        margin: 1rem 0;
-        color: var(--off-white);
+    .premium-content p {
+        color: #9ca3af;
+        margin-bottom: 1.5rem;
     }
 
-    .premium-upgrade-btn {
+    .premium-button {
         display: inline-block;
-        background: var(--orange);
-        color: white;
+        background: #f97316;
+        color: #ffffff;
         padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
+        border-radius: 6px;
         font-weight: 600;
-        margin-top: 1rem;
-        transition: background 0.2s;
-    }
-
-    .premium-upgrade-btn:hover {
-        background: var(--orange-dark);
-        color: white;
         text-decoration: none;
+        transition: background 0.3s ease;
     }
 
-    /* Rest of existing styles */
-    .validation-status.invalid {
-        background-color: rgba(239, 68, 68, 0.15);
-        border: 2px solid var(--red);
-        color: var(--red);
-    }
-    
-    .validation-icon {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        position: relative;
-    }
-    
-    .validation-status.invalid .validation-icon::before {
-        content: '✕';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: var(--red);
-        font-size: 18px;
-    }
-    
-    .validation-message {
-        margin: 0;
-        font-size: 1.1rem;
-        line-height: 1.4;
+    .premium-button:hover {
+        background: #ea580c;
+        text-decoration: none;
+        color: #ffffff;
     }
 
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .enhance-options {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        margin: 1rem 0;
-    }
-
-    .enhance-option {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .enhance-option label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--white);
-        font-weight: 500;
-        cursor: pointer;
-    }
-
-    .enhance-option input[type="checkbox"] {
-        width: 1.2rem;
-        height: 1.2rem;
-        accent-color: var(--orange);
-        cursor: pointer;
-    }
-
-    .option-description {
-        color: var(--off-white);
-        font-size: 0.9rem;
-        margin-left: 1.7rem;
-    }
-
-    .enhance-form {
-        margin-top: 1rem;
-    }
-
-    .sample-datasets {
-        margin-top: 2rem;
-        text-align: center;
-        padding: 0 2rem;
-    }
-
-    .sample-datasets h3 {
-        color: var(--off-white);
-        font-size: 1.2rem;
-        font-weight: 500;
-        margin-bottom: 1.5rem;
-    }
-
-    .sample-cards {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
-        margin: 0 auto;
-        max-width: 1000px;
-    }
-
-    .sample-card {
-        background: var(--dark);
-        border: 2px solid var(--border);
-        border-radius: 12px;
-        padding: 2rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .sample-card:hover {
-        border-color: var(--orange);
-        transform: translateY(-4px);
-        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .sample-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--orange), var(--orange-dark));
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .sample-card:hover::before {
-        opacity: 1;
-    }
-
-    .sample-card h4 {
-        color: var(--white);
-        margin: 0 0 1rem 0;
-        font-size: 1.4rem;
-        font-weight: 600;
-    }
-
-    .sample-card p {
-        color: var(--orange);
-        background: var(--dark);
-        margin: 0 0 1.5rem 0;
+    .enhance-button {
+        width: 100%;
+        background: #f97316;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        padding: 1rem;
         font-size: 1rem;
-        line-height: 1.5;
-    }
-
-    .dataset-size {
-        display: inline-flex;
+        font-weight: 600;
+        display: flex;
         align-items: center;
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--off-white);
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        margin-top: auto;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
     }
 
-    .dataset-size::before {
-        content: '📊';
-        margin-right: 0.5rem;
-        font-size: 1.1rem;
+    .enhance-button:hover {
+        background: #ea580c;
+    }
+
+    .button-icon {
+        font-size: 1.2rem;
     }
 
     @media (max-width: 768px) {
@@ -917,5 +759,222 @@
         .sample-card {
             padding: 1.5rem;
         }
+    }
+
+    /* Dataset Tabs Styles */
+    .dataset-tabs {
+        background: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 2rem;
+        display: none;  /* Hidden by default, shown when data is loaded */
+    }
+
+    .tab-buttons {
+        display: flex;
+        background: #2d2d2d;
+        padding: 0.5rem;
+        gap: 0.5rem;
+        border-bottom: 1px solid #3d3d3d;
+        position: relative;
+        z-index: 2;
+    }
+
+    .tab-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: none;
+        color: #9ca3af;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .tab-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f97316;
+    }
+
+    .tab-button.active {
+        background: #f97316;
+        color: white;
+    }
+
+    .tab-icon {
+        fill: currentColor;
+    }
+
+    .tab-content {
+        background: #1a1a1a;
+        padding: 1.5rem;
+    }
+
+    .tab-pane {
+        display: none;  /* Changed from position: absolute to display: none */
+    }
+
+    .tab-pane.active {
+        display: block;  /* Changed from opacity/visibility to display */
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        max-height: 500px;
+        border-radius: 8px;
+        background: #1a1a1a;
+        border: 1px solid #2d2d2d;
+    }
+
+    .table-wrapper table {
+        width: 100%;
+        background: #1a1a1a;
+    }
+
+    .table-wrapper th {
+        position: sticky;
+        top: 0;
+        background: #2d2d2d;
+        z-index: 1;
+        color: #f97316;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 2px solid #3d3d3d;
+    }
+
+    .table-wrapper td {
+        padding: 1rem;
+        border-bottom: 1px solid #3d3d3d;
+        color: #e5e7eb;
+    }
+
+    .table-wrapper tr:hover {
+        background: rgba(249, 115, 22, 0.1);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .summary-card {
+        background: #2d2d2d;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .summary-card h4 {
+        color: #f97316;
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+    }
+
+    .summary-details {
+        color: #9ca3af;
+    }
+
+    .summary-details p {
+        margin: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .summary-details strong {
+        color: white;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #9ca3af;
+        padding: 2rem;
+        background: #2d2d2d;
+        border-radius: 8px;
+        margin: 0;
+    }
+
+    .correlation-wrapper {
+        width: 100%;
+        height: 600px;
+        background: #2d2d2d;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .correlation-wrapper iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .summary-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-stats {
+        display: flex;
+        gap: 2rem;
+        background: #2d2d2d;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stat-label {
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+
+    .stat-value {
+        color: white;
+        font-weight: 600;
+        font-size: 1.125rem;
+    }
+
+    /* Add specific styles for the summary table */
+    #summary-table table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    #summary-table th {
+        background: #2d2d2d;
+        color: #f97316;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 2px solid #3d3d3d;
+        white-space: nowrap;
+    }
+
+    #summary-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #3d3d3d;
+        color: #e5e7eb;
+    }
+
+    #summary-table tr:hover {
+        background: rgba(249, 115, 22, 0.1);
+    }
+
+    /* Make sure the table wrapper shows scrollbars when needed */
+    .table-wrapper {
+        overflow: auto;
+        max-height: 500px;
+        border-radius: 8px;
+        background: #1a1a1a;
+        border: 1px solid #2d2d2d;
+        margin-top: 1rem;
     }
 </style>

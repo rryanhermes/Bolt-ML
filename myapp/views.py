@@ -22,6 +22,8 @@ import shutil
 import zipfile
 from django.utils import timezone
 import pytz
+import plotly.express as px
+import plotly.graph_objects as go
 
 def login(request):
     if request.method == 'POST':
@@ -124,6 +126,90 @@ def validate_csv(df):
     except Exception as e:
         return False, f"Error validating CSV: {str(e)}"
 
+def prepare_dataset_insights(df):
+    """Helper function to prepare dataset insights with proper handling of numeric/non-numeric columns"""
+    # Get numeric columns for correlation and description
+    numeric_cols = df.select_dtypes(include=['int64', 'float64']).columns
+    
+    # Calculate correlation only for numeric columns
+    correlation_html = ""
+    if len(numeric_cols) > 0:
+        correlation = df[numeric_cols].corr().round(2)
+        
+        # Create correlation heatmap using Plotly
+        fig = go.Figure(data=go.Heatmap(
+            z=correlation.values,
+            x=correlation.columns,
+            y=correlation.columns,
+            colorscale='RdBu',  # Red-Blue diverging colorscale
+            zmid=0,  # Center the colorscale at 0
+            text=np.round(correlation.values, 2),  # Show correlation values as text
+            texttemplate='%{text}',
+            textfont={"size": 12, "color": "black"},  # Make text larger and white
+            hoverongaps=False,
+            hovertemplate='%{x}<br>%{y}<br>Correlation: %{z:.2f}<extra></extra>'
+        ))
+        
+        # Update layout for dark theme
+        fig.update_layout(
+            template='plotly_dark',
+            paper_bgcolor='#1a1a1a',
+            plot_bgcolor='#2d2d2d',
+            margin=dict(t=30, l=0, r=0, b=0),
+            height=600,
+            font=dict(color='white', size=12),  # Make all text white and larger
+            xaxis=dict(
+                tickangle=45,
+                tickfont=dict(size=12, color='white')  # Make axis labels white
+            ),
+            yaxis=dict(
+                tickfont=dict(size=12, color='white')  # Make axis labels white
+            )
+        )
+        
+        correlation_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+    
+    # Calculate description only for numeric columns
+    description_html = ""
+    if len(numeric_cols) > 0:
+        description = df[numeric_cols].describe().round(2)
+        description_html = description.to_html(classes='table table-dark table-hover')
+    
+    # Create summary table
+    rows, _ = df.shape
+    summary_data = []
+    
+    for column in df.columns:
+        null_count = int(df[column].isna().sum())
+        null_percentage = round((null_count / rows) * 100, 2) if null_count > 0 else 0
+        unique_count = df[column].nunique()
+        unique_percentage = round((unique_count / rows) * 100, 2)
+        dtype = df[column].dtype
+        
+        summary_data.append({
+            'Column': column,
+            'Type': str(dtype),
+            'Unique Values': f"{unique_count} ({unique_percentage}%)",
+            'Null Count': f"{null_count} ({null_percentage}%)",
+            'First Value': str(df[column].iloc[0]) if not pd.isna(df[column].iloc[0]) else "NULL",
+            'Last Value': str(df[column].iloc[-1]) if not pd.isna(df[column].iloc[-1]) else "NULL"
+        })
+    
+    summary_df = pd.DataFrame(summary_data)
+    summary_html = summary_df.to_html(classes='table table-dark table-hover', index=False)
+    
+    return {
+        'header': df.head().to_html(classes='table table-dark table-hover'),
+        'description': description_html,
+        'correlation': correlation_html,
+        'summary': {
+            'table': summary_html,
+            'rows': len(df),
+            'columns': len(df.columns),
+            'memory_usage': f"{df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB",
+        }
+    }
+
 @login_required
 def upload_csv(request):
     if request.method != 'POST':
@@ -166,13 +252,12 @@ def upload_csv(request):
             # Force session save
             request.session.modified = True
             
-            # Round numeric columns to 2 decimal places in the description
-            description = df.describe().round(2).to_html()
+            # Prepare dataset insights
+            dataset_insights = prepare_dataset_insights(df)
             
             return JsonResponse({
                 'columns': list(df.columns),
-                'description': description,
-                'plots': [],  # Add any plots you want to show
+                'dataset_insights': dataset_insights,
                 'is_valid': True,
                 'message': message
             })
@@ -270,7 +355,7 @@ def build_model(request):
         
         # Train the model
         try:
-            model_wrapper, score, metric_name = train_model(X, y, problem_type, evaluation_metric)
+            model_wrapper, score, metric_name, additional_metrics = train_model(X, y, problem_type, evaluation_metric)
         except Exception as e:
             print(f"Error training model: {str(e)}")
             return JsonResponse({'error': f'Error training model: {str(e)}'}, status=500)
@@ -305,6 +390,18 @@ def build_model(request):
                     pickle.dump(model_wrapper, f)
             else:
                 joblib.dump(model_wrapper, abs_model_path)
+            
+            # Create response data after successful save
+            response_data = {
+                'success': True,
+                'score': score,
+                'metric': metric_name,
+                'metrics': additional_metrics,
+                'model_url': rel_model_path,
+                'filename': model_filename
+            }
+            
+            return JsonResponse(response_data)
                 
         except Exception as e:
             print(f"Error saving model: {str(e)}")
@@ -647,14 +744,13 @@ def get_sample_dataset(request, dataset_name):
         # Force session save
         request.session.modified = True
         
-        # Round numeric columns to 2 decimal places in the description
-        description = df.describe().round(2).to_html()
+        # Prepare dataset insights
+        dataset_insights = prepare_dataset_insights(df)
         
         return JsonResponse({
             'success': True,
             'columns': list(df.columns),
-            'description': description,
-            'plots': [],  # Add any plots you want to show
+            'dataset_insights': dataset_insights,
             'message': 'Dataset loaded successfully'
         })
         
