@@ -1,7 +1,6 @@
 import xlwings as xw
 import pickle
 import pandas as pd
-import os
 from .modeling import ModelWrapper  # Import your existing ModelWrapper class
 from myapp.modeling import transform  # Import the transform function
 
@@ -30,14 +29,11 @@ class ExcelModelIntegration:
         except Exception as e:
             return f"Error: {str(e)}"
 
-# Usage example - you can add this at the bottom of the file
 if __name__ == "__main__":
-    # Replace 'your_model.pkl' with the actual path to your saved ModelWrapper
-    model_path = 'media/models/1/titanic_classification_accuracy.pkl'
-    input_data = pd.read_csv('models/titanic copy.csv')
-    # input_data.drop(columns=['Survived'])
-    preprocessed_data = transform(input_data, target_column='Survived', problem_type='classification')
-
+    model_path = 'models/loans.pkl'
+    input_data = pd.read_csv('models/Loan_Data_Test.csv')
+    
+    preprocessed_data = transform(input_data, target_column='Loan_Status', problem_type='classification')
     model_integration = ExcelModelIntegration(model_path)
 
     predictions = model_integration.predict(preprocessed_data.values)

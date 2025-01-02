@@ -391,50 +391,41 @@ def build_model(request):
             else:
                 joblib.dump(model_wrapper, abs_model_path)
             
-            # Create response data after successful save
-            response_data = {
-                'success': True,
-                'score': score,
-                'metric': metric_name,
-                'metrics': additional_metrics,
-                'model_url': rel_model_path,
-                'filename': model_filename
-            }
+            # Create model record in database
+            try:
+                user_model = UserModel.objects.create(
+                    user=request.user,
+                    name=model_name,
+                    model_type=problem_type,
+                    file_path=rel_model_path,  # Store relative path in database
+                    metrics={
+                        'score': float(score),
+                        'metric': metric_name,  # Use original metric name
+                        'format': file_format,
+                        **additional_metrics  # Include additional metrics
+                    }
+                )
+            except Exception as e:
+                print(f"Error creating model record: {str(e)}")
+                # Clean up the saved model file if database entry fails
+                if os.path.exists(abs_model_path):
+                    os.remove(abs_model_path)
+                return JsonResponse({'error': 'Error saving model information'}, status=500)
             
-            return JsonResponse(response_data)
+            # Return success response with model information
+            return JsonResponse({
+                'success': True,
+                'model_id': user_model.id,
+                'score': float(score),
+                'metric': format_metric_name(metric_name),  # Format metric name for display
+                'model_url': f'/download-model/{user_model.id}/',
+                'filename': model_filename,
+                'metrics': additional_metrics
+            })
                 
         except Exception as e:
             print(f"Error saving model: {str(e)}")
             return JsonResponse({'error': 'Error saving model file'}, status=500)
-        
-        # Create model record in database
-        try:
-            user_model = UserModel.objects.create(
-                user=request.user,
-                name=model_name,
-                model_type=problem_type,
-                file_path=rel_model_path,  # Store relative path in database
-                metrics={
-                    'score': float(score),
-                    'metric': metric_name,  # Use original metric name
-                    'format': file_format
-                }
-            )
-        except Exception as e:
-            print(f"Error creating model record: {str(e)}")
-            # Clean up the saved model file if database entry fails
-            if os.path.exists(abs_model_path):
-                os.remove(abs_model_path)
-            return JsonResponse({'error': 'Error saving model information'}, status=500)
-        
-        return JsonResponse({
-            'success': True,
-            'model_id': user_model.id,
-            'score': float(score),
-            'metric': format_metric_name(metric_name),  # Format metric name for display
-            'model_url': f'/download-model/{user_model.id}/',
-            'filename': model_filename
-        })
         
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON in request body'}, status=400)

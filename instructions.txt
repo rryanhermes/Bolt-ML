@@ -16,3 +16,6 @@ def testing(request):
 
 3. add url pattern to urls.py (both??)
 path('testing/', views.testing, name='testing')
+
+
+python -m myapp.excel_integration
