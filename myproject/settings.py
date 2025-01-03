@@ -31,7 +31,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['personal-website-395618.appspot.com', 'personal-website-395618.uc.r.appspot.com', 'boltml-686910583227.us-central1.run.app', 'boltml.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'personal-website-395618.appspot.com',
+    'personal-website-395618.uc.r.appspot.com',
+    'boltml-686910583227.us-central1.run.app',
+    'boltml.onrender.com',
+    'localhost',
+    '127.0.0.1',
+    '20250102t160603-dot-personal-website-395618.uc.r.appspot.com',
+    '*'
+]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
 
@@ -199,7 +208,7 @@ DEBUG = False if os.environ.get('RENDER') else True
 
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False  # Handled by App Engine
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -207,8 +216,17 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    CSRF_TRUSTED_ORIGINS = ['https://boltml.onrender.com']
-    SESSION_COOKIE_DOMAIN = 'boltml.onrender.com'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+    CSRF_TRUSTED_ORIGINS = [
+        'https://personal-website-395618.uc.r.appspot.com',
+        'https://personal-website-395618.appspot.com',
+        'https://boltml-686910583227.us-central1.run.app',
+        'https://boltml.onrender.com'
+    ]
+    CSRF_COOKIE_DOMAIN = None  # Let Django handle this automatically
+    CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
 
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

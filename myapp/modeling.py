@@ -14,7 +14,6 @@ from sklearn.feature_selection import SelectFromModel
 import pandas as pd
 import numpy as np
 from collections import Counter
-import gc
 
 def transform(data, target_column=None, problem_type='classification'):
     """Transform the input data with enhanced preprocessing for better model accuracy."""
@@ -125,43 +124,83 @@ class ModelWrapper:
         self.label_encoder = state['label_encoder']
         self.problem_type = state['problem_type']
 
-def train_model(X, y, model_type):
-    """Train a machine learning model with memory optimization."""
-    try:
-        # Split data with memory optimization
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        del X, y  # Free up memory
-        gc.collect()  # Force garbage collection
+def train_model(X, y, problem_type, evaluation_metric='accuracy'):
+    """Train a model based on the problem type and evaluation metric."""
+    # Split the data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    label_encoder = None
+    if problem_type.lower() == 'classification':
+        # Convert target to numeric if it's categorical
+        if y.dtype == 'object':
+            label_encoder = LabelEncoder()
+            y_train = label_encoder.fit_transform(y_train)
+            y_test = label_encoder.transform(y_test)
         
-        # Initialize model based on type
-        if model_type == 'regression':
-            from sklearn.linear_model import LinearRegression
-            model = LinearRegression()
-            metric_func = r2_score
-            metric_name = 'r2_score'
-        else:  # classification
-            from sklearn.ensemble import RandomForestClassifier
-            model = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-            metric_func = accuracy_score
-            metric_name = 'accuracy'
-        
-        # Train model
+        # Train classifier
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
         
-        # Make predictions and calculate metrics
+        # Get predictions
         y_pred = model.predict(X_test)
-        score = metric_func(y_test, y_pred)
         
-        # Clean up test data
-        del X_test, y_test, y_pred
-        gc.collect()
-        
+        # Calculate all classification metrics
         metrics = {
-            metric_name: float(score),
-            'model_type': model_type
+            'precision': precision_score(y_test, y_pred, average='weighted'),
+            'recall': recall_score(y_test, y_pred, average='weighted'),
+            'f1': f1_score(y_test, y_pred, average='weighted')
         }
         
-        return model, metrics
+        # Calculate primary metric based on evaluation_metric parameter
+        if evaluation_metric == 'accuracy':
+            score = accuracy_score(y_test, y_pred)
+        elif evaluation_metric == 'precision':
+            score = metrics['precision']
+        elif evaluation_metric == 'recall':
+            score = metrics['recall']
+        elif evaluation_metric == 'f1':
+            score = metrics['f1']
+        elif evaluation_metric == 'auc':
+            from sklearn.metrics import roc_auc_score
+            # For multi-class, we need to binarize the labels
+            from sklearn.preprocessing import label_binarize
+            classes = list(range(len(set(y_test))))
+            if len(classes) > 2:
+                y_test_bin = label_binarize(y_test, classes=classes)
+                y_pred_proba = model.predict_proba(X_test)
+                score = roc_auc_score(y_test_bin, y_pred_proba, multi_class='ovr')
+            else:
+                score = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+        else:
+            score = accuracy_score(y_test, y_pred)  # Default to accuracy
         
-    except Exception as e:
-        raise Exception(f"Error in model training: {str(e)}") 
+        # Wrap the model with the label encoder
+        wrapped_model = ModelWrapper(model, label_encoder, 'classification')
+        
+        return wrapped_model, score, evaluation_metric, metrics
+        
+    elif problem_type.lower() == 'regression':
+        # Train regressor
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+        
+        # Get predictions
+        y_pred = model.predict(X_test)
+        
+        # Calculate metric based on evaluation_metric parameter
+        if evaluation_metric == 'r2':
+            score = r2_score(y_test, y_pred)
+        elif evaluation_metric == 'mse':
+            score = mean_squared_error(y_test, y_pred)
+        elif evaluation_metric == 'rmse':
+            score = mean_squared_error(y_test, y_pred, squared=False)
+        elif evaluation_metric == 'mae':
+            from sklearn.metrics import mean_absolute_error
+            score = mean_absolute_error(y_test, y_pred)
+        else:
+            score = r2_score(y_test, y_pred)  # Default to R²
+        
+        # Wrap the model without label encoder for regression
+        wrapped_model = ModelWrapper(model, None, 'regression')
+        
+        return wrapped_model, score, evaluation_metric, None  # Return None for metrics in regression case 

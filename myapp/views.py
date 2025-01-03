@@ -313,12 +313,20 @@ def format_metric_name(metric_name):
     return metric_map.get(metric_name, metric_name.upper())
 
 @login_required
-def build_model_api(request):
+def build_model(request):
     if request.method != 'POST':
-        return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
-
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+    
     try:
-        # Get data from session
+        data = json.loads(request.body)
+        target_column = data.get('target_column')
+        problem_type = data.get('problem_type')
+        evaluation_metric = data.get('evaluation_metric', 'accuracy')  # Default to accuracy
+        
+        if not target_column or not problem_type:
+            return JsonResponse({'error': 'Missing required fields: target_column and problem_type'}, status=400)
+        
+        # Get the data from the session
         original_data = request.session.get('original_data')
         transformed_data = request.session.get('transformed_data')
         original_filename = request.session.get('original_filename', 'model')
@@ -326,20 +334,10 @@ def build_model_api(request):
         if not original_data or not transformed_data:
             return JsonResponse({'error': 'No data found. Please upload a CSV file first.'}, status=400)
         
-        # Get parameters from request
-        data = json.loads(request.body)
-        target_column = data.get('target_column')
-        model_type = data.get('model_type')
-        model_name = data.get('model_name', original_filename)
-
-        if not all([target_column, model_type]):
-            return JsonResponse({'error': 'Missing required parameters'}, status=400)
-        
         try:
-            # Parse the JSON data back into DataFrames using StringIO
-            from io import StringIO
-            df = pd.read_json(StringIO(original_data), orient='split')
-            transformed_df = pd.read_json(StringIO(transformed_data), orient='split')
+            # Parse the JSON data back into DataFrames
+            df = pd.read_json(original_data, orient='split')
+            transformed_df = pd.read_json(transformed_data, orient='split')
             
             # Verify the data is valid
             if df.empty or transformed_df.empty:
@@ -348,50 +346,106 @@ def build_model_api(request):
             # Verify target column exists
             if target_column not in df.columns:
                 return JsonResponse({'error': f'Target column "{target_column}" not found in dataset'}, status=400)
-
-            # Train the model with memory optimization
-            X = transformed_df
+            
+        except Exception as e:
+            print(f"Error parsing session data: {str(e)}")
+            return JsonResponse({'error': 'Invalid data format in session. Please upload the CSV file again.'}, status=400)
+        
+        # Prepare features and target
+        try:
+            X = transformed_df.drop(columns=[target_column])
+            # Ensure y is 1D array
             y = df[target_column]
-
-            # Clear memory
-            del df
-            del transformed_df
+            if len(y.shape) > 1:
+                # If y is 2D, take the first column
+                y = y.iloc[:, 0] if y.shape[1] > 0 else y
+            # Convert to numpy array and ensure 1D
+            y = np.array(y).ravel()
+        except KeyError:
+            return JsonResponse({'error': f'Target column {target_column} not found in dataset'}, status=400)
+        except Exception as e:
+            print(f"Error preparing data: {str(e)}")
+            return JsonResponse({'error': 'Error preparing data for training'}, status=400)
+        
+        # Train the model
+        try:
+            model_wrapper, score, metric_name, additional_metrics = train_model(X, y, problem_type, evaluation_metric)
+        except Exception as e:
+            print(f"Error training model: {str(e)}")
+            return JsonResponse({'error': f'Error training model: {str(e)}'}, status=500)
+        
+        # Save the model
+        try:
+            # Get file format from request or default to pkl
+            file_format = data.get('file_format', 'pkl')
+            if file_format not in ['pkl', 'joblib']:
+                file_format = 'pkl'  # Default to pkl if invalid format specified
             
-            # Train model
-            model, metrics = train_model(X, y, model_type)
+            # Remove .csv extension if present and clean filename
+            base_filename = original_filename.lower().replace('.csv', '').replace(' ', '_')
+            # Create model name with format: filename_problemtype_metric
+            model_name = f"{base_filename}_{problem_type}_{metric_name}"
             
-            # Save model
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            model_filename = f"{model_name}_{timestamp}.joblib"
-            model_path = os.path.join(settings.MEDIA_ROOT, 'models', request.user.username)
-            os.makedirs(model_path, exist_ok=True)
-            model_file_path = os.path.join(model_path, model_filename)
+            # Create user-specific directory under MEDIA_ROOT/models
+            user_models_dir = os.path.join(settings.MEDIA_ROOT, 'models', str(request.user.id))
+            os.makedirs(user_models_dir, exist_ok=True)
             
-            # Save using joblib for better memory handling
-            joblib.dump(model, model_file_path)
+            # Set file extension based on format
+            file_extension = '.pkl' if file_format == 'pkl' else '.joblib'
+            model_filename = f"{model_name}{file_extension}"
             
-            # Create model record
-            user_model = UserModel.objects.create(
-                user=request.user,
-                name=model_name,
-                model_type=model_type,
-                file_path=os.path.join('models', request.user.username, model_filename),
-                metrics=metrics
-            )
+            # Create absolute and relative paths
+            abs_model_path = os.path.join(user_models_dir, model_filename)
+            rel_model_path = os.path.join('models', str(request.user.id), model_filename)
             
+            # Save the model in the specified format
+            if file_format == 'pkl':
+                with open(abs_model_path, 'wb') as f:
+                    pickle.dump(model_wrapper, f)
+            else:
+                joblib.dump(model_wrapper, abs_model_path)
+            
+            # Create model record in database
+            try:
+                user_model = UserModel.objects.create(
+                    user=request.user,
+                    name=model_name,
+                    model_type=problem_type,
+                    file_path=rel_model_path,  # Store relative path in database
+                    metrics={
+                        'score': float(score),
+                        'metric': metric_name,  # Use original metric name
+                        'format': file_format,
+                        **additional_metrics  # Include additional metrics
+                    }
+                )
+            except Exception as e:
+                print(f"Error creating model record: {str(e)}")
+                # Clean up the saved model file if database entry fails
+                if os.path.exists(abs_model_path):
+                    os.remove(abs_model_path)
+                return JsonResponse({'error': 'Error saving model information'}, status=500)
+            
+            # Return success response with model information
             return JsonResponse({
                 'success': True,
                 'model_id': user_model.id,
-                'metrics': metrics
+                'score': float(score),
+                'metric': format_metric_name(metric_name),  # Format metric name for display
+                'model_url': f'/download-model/{user_model.id}/',
+                'filename': model_filename,
+                'metrics': additional_metrics
             })
-            
+                
         except Exception as e:
-            return JsonResponse({'error': f'Error training model: {str(e)}'}, status=500)
-            
+            print(f"Error saving model: {str(e)}")
+            return JsonResponse({'error': 'Error saving model file'}, status=500)
+        
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON in request body'}, status=400)
     except Exception as e:
-        return JsonResponse({'error': f'Error creating model: {str(e)}'}, status=500)
+        print(f"Unexpected error in build_model: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required(login_url='/login/')
 def my_account(request):

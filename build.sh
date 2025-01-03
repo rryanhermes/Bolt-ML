@@ -13,7 +13,7 @@ echo "Running all other migrations..."
 python manage.py migrate
 
 echo "Collecting static files..."
-python manage.py collectstatic --no-input
+python manage.py collectstatic --no-input --clear
 
 echo "Creating superuser..."
 DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD} python manage.py createsuperuser --noinput \
