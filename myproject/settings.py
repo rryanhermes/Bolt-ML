@@ -77,6 +77,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "myapp.context_processors.analytics",
             ],
         },
     },
@@ -251,3 +252,6 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Google Analytics
+GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', '')

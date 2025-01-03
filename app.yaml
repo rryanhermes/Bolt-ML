@@ -10,6 +10,7 @@ env_variables:
   CSRF_TRUSTED_ORIGINS: 'https://personal-website-395618.uc.r.appspot.com,https://personal-website-395618.appspot.com,http://127.0.0.1:8000'
   USE_X_FORWARDED_HOST: 'True'
   USE_X_FORWARDED_PORT: 'True'
+  GA_TRACKING_ID: 'G-P488NT9NQC'
 
 handlers:
 - url: /static
