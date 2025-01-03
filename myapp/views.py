@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from .models import UserModel
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import json
 import os
 from django.conf import settings
@@ -25,6 +25,7 @@ import pytz
 import plotly.express as px
 import plotly.graph_objects as go
 import io
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 def login(request):
     if request.method == 'POST':
@@ -225,12 +226,19 @@ def prepare_dataset_insights(df):
     }
 
 @login_required
+@ensure_csrf_cookie
 def upload_csv(request):
+    print("Received upload request")  # Debug logging
+    print("Request method:", request.method)
+    print("Content-Type:", request.headers.get('Content-Type'))
+    
     if request.method != 'POST':
+        print("Method not allowed:", request.method)  # Debug logging
         return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
     
     try:
         csv_file = request.FILES['file']
+        print("File received:", csv_file.name)  # Debug logging
         if not csv_file.name.endswith('.csv'):
             return JsonResponse({
                 'error': 'File must be a CSV',
@@ -273,7 +281,7 @@ def upload_csv(request):
                 'columns': list(df.columns),
                 'dataset_insights': dataset_insights,
                 'is_valid': True,
-                'message': message
+                'message': 'File uploaded successfully'
             })
             
         except pd.errors.EmptyDataError:
@@ -294,8 +302,8 @@ def upload_csv(request):
         return JsonResponse({
             'error': str(e),
             'is_valid': False,
-            'message': 'An error occurred while processing the file.'
-        }, status=400)
+            'message': 'An error occurred while processing the file'
+        }, status=500)
 
 def format_metric_name(metric_name):
     """Format metric name for display"""
@@ -313,6 +321,7 @@ def format_metric_name(metric_name):
     return metric_map.get(metric_name, metric_name.upper())
 
 @login_required
+@ensure_csrf_cookie
 def build_model(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
@@ -715,32 +724,52 @@ def about(request):
     return render(request, 'about.html')
 
 @login_required
+@ensure_csrf_cookie
 def get_sample_dataset(request, dataset_name):
-    """Handle sample dataset requests"""
+    print(f"Loading sample dataset: {dataset_name}")  # Debug logging
+    
+    # Define the mapping of dataset names to file paths
+    dataset_mapping = {
+        'titanic': os.path.join('myapp', 'models', 'titanic.csv'),
+        'credit': os.path.join('myapp', 'models', 'credit.csv'),
+        'housing': os.path.join('myapp', 'models', 'housingprices.csv')
+    }
+    
     try:
-        # Map dataset names to file paths
-        dataset_paths = {
-            'titanic': 'models/titanic.csv',
-            'housing': 'models/housingprices.csv',
-            'credit': 'models/credit.csv'
-        }
-        
-        if dataset_name not in dataset_paths:
+        # Get the file path for the requested dataset
+        if dataset_name not in dataset_mapping:
             return JsonResponse({
                 'success': False,
-                'message': 'Invalid dataset name'
-            }, status=400)
-            
-        # Get the absolute path to the dataset
-        dataset_path = os.path.join(settings.BASE_DIR, dataset_paths[dataset_name])
+                'message': f'Dataset {dataset_name} not found'
+            }, status=404)
+        
+        file_path = dataset_mapping[dataset_name]
+        absolute_path = os.path.join(settings.BASE_DIR, file_path)
+        print(f"Looking for dataset file at: {absolute_path}")  # Debug logging
+        
+        if not os.path.exists(absolute_path):
+            print(f"File not found at path: {absolute_path}")  # Debug logging
+            return JsonResponse({
+                'success': False,
+                'message': f'Dataset file not found'
+            }, status=404)
         
         # Read the CSV file
-        df = pd.read_csv(dataset_path)
+        df = pd.read_csv(absolute_path)
+        print(f"Successfully read CSV file with shape: {df.shape}")
         
-        # Store the original dataframe in the session
+        # Validate the CSV
+        is_valid, message = validate_csv(df)
+        if not is_valid:
+            return JsonResponse({
+                'success': False,
+                'message': message
+            }, status=400)
+        
+        # Store the data in session
         request.session['original_data'] = df.to_json(orient='split', date_format='iso')
         request.session['columns'] = list(df.columns)
-        request.session['original_filename'] = f"{dataset_name}.csv"
+        request.session['original_filename'] = os.path.basename(absolute_path)
         
         # Transform the data without encoding the target column yet
         transformed_df = transform(df)
@@ -759,11 +788,6 @@ def get_sample_dataset(request, dataset_name):
             'message': 'Dataset loaded successfully'
         })
         
-    except FileNotFoundError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Sample dataset file not found'
-        }, status=404)
     except Exception as e:
         print(f"Error loading sample dataset: {str(e)}")
         return JsonResponse({

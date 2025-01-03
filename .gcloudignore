@@ -43,7 +43,6 @@ coverage.xml
 testing.ipynb
 testing2.py
 instructions.txt
-models/*.csv
 media/models/*
 !media/models/.gitkeep
 

@@ -7,13 +7,17 @@ env_variables:
   DEBUG: False
   ALLOWED_HOSTS: '*'
   GOOGLE_CLOUD_PROJECT: 'personal-website-395618'
-  CSRF_TRUSTED_ORIGINS: 'https://personal-website-395618.uc.r.appspot.com,https://personal-website-395618.appspot.com,https://boltml-686910583227.us-central1.run.app,https://boltml.onrender.com'
+  CSRF_TRUSTED_ORIGINS: 'https://personal-website-395618.uc.r.appspot.com,https://personal-website-395618.appspot.com,http://127.0.0.1:8000'
   USE_X_FORWARDED_HOST: 'True'
   USE_X_FORWARDED_PORT: 'True'
 
 handlers:
 - url: /static
   static_dir: staticfiles
+  secure: always
+
+- url: /myapp/models
+  static_dir: myapp/models
   secure: always
 
 - url: /.*

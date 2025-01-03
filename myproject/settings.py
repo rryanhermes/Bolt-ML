@@ -34,12 +34,8 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'personal-website-395618.appspot.com',
     'personal-website-395618.uc.r.appspot.com',
-    'boltml-686910583227.us-central1.run.app',
-    'boltml.onrender.com',
     'localhost',
-    '127.0.0.1',
-    '20250102t160603-dot-personal-website-395618.uc.r.appspot.com',
-    '*'
+    '127.0.0.1'
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
@@ -222,11 +218,27 @@ if not DEBUG:
     CSRF_TRUSTED_ORIGINS = [
         'https://personal-website-395618.uc.r.appspot.com',
         'https://personal-website-395618.appspot.com',
-        'https://boltml-686910583227.us-central1.run.app',
-        'https://boltml.onrender.com'
+        'http://127.0.0.1:8000',
+        'http://localhost:8000'
     ]
     CSRF_COOKIE_DOMAIN = None  # Let Django handle this automatically
     CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
+else:
+    # Development settings
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_TRUSTED_ORIGINS = [
+        'https://personal-website-395618.uc.r.appspot.com',
+        'https://personal-website-395618.appspot.com',
+        'http://127.0.0.1:8000',
+        'http://localhost:8000'
+    ]
+
+# CSRF settings that apply to both development and production
+CSRF_USE_SESSIONS = False  # Use cookie-based tokens
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

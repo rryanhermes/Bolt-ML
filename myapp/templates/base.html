@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}BoltML{% endblock %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'images/BoltML.png' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
@@ -42,6 +43,7 @@
     </script>
 </head>
 <body>
+    {% csrf_token %}
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo-container">
@@ -101,22 +103,6 @@
                 console.error('Error setting timezone:', error);
             }
         });
-
-        // Helper function to get CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
     </script>
 </body>
 </html> 

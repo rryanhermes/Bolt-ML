@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="upload-section">
     <h2 class="page-title">Build Your Machine Learning Model</h2>
     <div id="drop-zone" class="drop-zone">
@@ -225,23 +226,35 @@
 
 {% block extra_js %}
 <script>
-    $(document).ready(function() {
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+    // Get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
-        const csrftoken = getCookie('csrftoken');
+        return cookieValue;
+    }
 
+    // Get CSRF token once when the page loads
+    const csrftoken = getCookie('csrftoken');
+
+    // Set up CSRF token for all AJAX requests
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    $(document).ready(function() {
         $('#drop-zone').on('dragover', function(event) {
             event.preventDefault();
             $(this).addClass('hover');
@@ -271,48 +284,55 @@
             // Show loading overlay
             document.getElementById('loadingOverlay').classList.add('show');
             
-            $.ajax({
-                url: '/upload-csv/',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+            fetch('/upload-csv/', {
+                method: 'POST',
+                body: formData,
                 headers: {
                     'X-CSRFToken': csrftoken
                 },
-                success: function(response) {
-                    // Hide loading overlay
-                    document.getElementById('loadingOverlay').classList.remove('show');
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Response status:', response.status); // Debug logging
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Server returned ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(response => {
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').classList.remove('show');
+                
+                if (response.is_valid) {
+                    // Hide validation status for valid files
+                    $('#validation-status').hide();
+                    updateDatasetInsights(response);
                     
-                    if (response.is_valid) {
-                        // Hide validation status for valid files
-                        $('#validation-status').hide();
-                        updateDatasetInsights(response);
-                        
-                        const targetSelect = $('#target-column');
-                        targetSelect.empty();
-                        response.columns.forEach(function(column) {
-                            targetSelect.append($('<option>', {
-                                value: column,
-                                text: column
-                            }));
-                        });
-                        $('#ml-form').show();
-                        document.getElementById('build-model-btn').disabled = false;
-                    } else {
-                        showValidationStatus(false, response.message);
-                        $('#ml-form').hide();
-                        $('#result').html('');
-                    }
-                },
-                error: function(xhr) {
-                    // Hide loading overlay
-                    document.getElementById('loadingOverlay').classList.remove('show');
-                    const response = xhr.responseJSON || {};
-                    showValidationStatus(false, response.message || 'An error occurred while processing the file');
+                    const targetSelect = $('#target-column');
+                    targetSelect.empty();
+                    response.columns.forEach(function(column) {
+                        targetSelect.append($('<option>', {
+                            value: column,
+                            text: column
+                        }));
+                    });
+                    $('#ml-form').show();
+                    document.getElementById('build-model-btn').disabled = false;
+                } else {
+                    showValidationStatus(false, response.message);
                     $('#ml-form').hide();
                     $('#result').html('');
                 }
+            })
+            .catch(error => {
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').classList.remove('show');
+                showValidationStatus(false, 'An error occurred while processing the file');
+                $('#ml-form').hide();
+                $('#result').html('');
+                console.error('Error:', error);
             });
         }
 
@@ -346,25 +366,46 @@
 
         $('#ml-config').on('submit', function(event) {
             event.preventDefault();
-            
+            $('#loadingOverlay').addClass('show');
+
             const formData = {
                 target_column: $('#target-column').val(),
                 problem_type: $('#problem-type').val(),
-                file_format: $('#file-format').val(),
-                evaluation_metric: $('#evaluation-metric').val()
+                evaluation_metric: $('#evaluation-metric').val(),
+                file_format: $('#file-format').val()
             };
 
-            $('#loadingOverlay').addClass('show');
+            // Get CSRF token from cookie
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+            console.log('Sending request with CSRF token:', csrftoken); // Debug log
 
             fetch('/build-model-api/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
+                    'X-CSRFToken': csrftoken,
+                    'Accept': 'application/json'
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify(formData)
             })
             .then(response => {
+                console.log('Response status:', response.status); // Debug log
                 if (!response.ok) {
                     return response.text().then(text => {
                         throw new Error(`Server returned ${response.status}: ${text}`);
@@ -389,12 +430,17 @@
                     $('#download-section').show();
                     
                     // Set the model blob and filename from the response
-                    fetch(data.model_url)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            modelBlob = blob;
-                            modelFilename = data.filename || 'model.' + $('#file-format').val();
-                        });
+                    fetch(data.model_url, {
+                        headers: {
+                            'X-CSRFToken': csrftoken
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => response.blob())
+                    .then(blob => {
+                        modelBlob = blob;
+                        modelFilename = data.filename || 'model.' + $('#file-format').val();
+                    });
                 } else {
                     throw new Error(data.error || 'Failed to build model');
                 }
@@ -539,9 +585,11 @@
             showLoading();
             
             fetch(`/get-sample-dataset/${dataset}/`, {
+                method: 'GET',
                 headers: {
                     'X-CSRFToken': csrftoken
-                }
+                },
+                credentials: 'same-origin'
             })
             .then(response => {
                 if (!response.ok) {
