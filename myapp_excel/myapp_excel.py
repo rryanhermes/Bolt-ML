@@ -2,7 +2,7 @@ import xlwings as xw
 import joblib
 import pandas as pd
 import os
-# from .modeling import ModelWrapper  # Import your existing ModelWrapper class
+import pickle
 
 class ModelWrapper:
     def __init__(self, model, label_encoder=None, problem_type=None):
@@ -15,15 +15,19 @@ class ModelWrapper:
         if self.label_encoder and self.problem_type == 'classification':
             return self.label_encoder.inverse_transform(predictions)
         return predictions
-    
+
 class ExcelModelIntegration:
     def __init__(self, model_path):
         self.model_path = model_path
         self.model = self.load_model()
     
     def load_model(self):
-        """Load the saved ModelWrapper instance using joblib"""
-        return joblib.load(self.model_path)
+        """Load the saved ModelWrapper instance using joblib or pickle"""
+        if self.model_path.endswith('.joblib'):
+            return joblib.load(self.model_path)
+        else:
+            with open(self.model_path, 'rb') as file:
+                return pickle.load(file)
     
     @xw.func
     def predict(self, input_range):
@@ -42,7 +46,6 @@ class ExcelModelIntegration:
 
 # Usage example - you can add this at the bottom of the file
 if __name__ == "__main__":
-    # Replace 'your_model.pkl' with the actual path to your saved ModelWrapper
-    model_path = 'models/titanic.joblib'
+    model_path = 'models/titanic.joblib'  # Update with your model path
     model_integration = ExcelModelIntegration(model_path)
     print(model_integration.predict([[1, 2, 3], [4, 5, 6]]))  # Example usage

@@ -35,7 +35,9 @@ ALLOWED_HOSTS = [
     'personal-website-395618.appspot.com',
     'personal-website-395618.uc.r.appspot.com',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    'bolt-ml.com',
+    'www.bolt-ml.com'
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
@@ -220,7 +222,8 @@ if not DEBUG:
         'https://personal-website-395618.uc.r.appspot.com',
         'https://personal-website-395618.appspot.com',
         'http://127.0.0.1:8000',
-        'http://localhost:8000'
+        'https://bolt-ml.com',
+        'https://www.bolt-ml.com'
     ]
     CSRF_COOKIE_DOMAIN = None  # Let Django handle this automatically
     CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
@@ -232,7 +235,8 @@ else:
         'https://personal-website-395618.uc.r.appspot.com',
         'https://personal-website-395618.appspot.com',
         'http://127.0.0.1:8000',
-        'http://localhost:8000'
+        'https://bolt-ml.com',
+        'https://www.bolt-ml.com'
     ]
 
 # CSRF settings that apply to both development and production
