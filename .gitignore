@@ -23,6 +23,20 @@ media/
 venv/
 env/
 .venv/
+.env.local
+.env.*.local
+*.env
+.python-version
+
+# Security
+*.pem
+*.key
+*.cert
+*.crt
+*.csr
+*.p12
+*.pfx
+*.keystore
 
 # Collected static files
 *.pyc

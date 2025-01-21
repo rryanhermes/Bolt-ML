@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="upload-section">
+    <h2 class="page-title">Build Your Machine Learning Model (Excel Add-in)</h2>
+    <div id="drop-zone" class="drop-zone">
+        <div class="drop-zone-content">
+            <p class="drop-zone-text">
+                Drag and drop your CSV file here or browse files
+            </p>
+        </div>
+    </div>
+    <input type="file" id="file-input" accept=".csv" style="display: none;">
+    
+    <!-- Sample Datasets Section -->
+    <div style="margin-top: 2rem; text-align: center;">
+        <h3 style="color: #9ca3af; font-size: 1.2rem; font-weight: 500; margin-bottom: 1.5rem;">or try a sample dataset</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 0 auto; max-width: 1000px; padding: 0 2rem;">
+            <div class="sample-card" data-dataset="titanic">
+                <h4>Titanic Dataset</h4>
+                <p>Predict passenger survival</p>
+            </div>
+            <div class="sample-card" data-dataset="housing">
+                <h4>Housing Prices</h4>
+                <p>Predict house prices</p>
+            </div>
+            <div class="sample-card" data-dataset="credit">
+                <h4>Credit Risk</h4>
+                <p>Predict credit defaults</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="validation-status" style="display: none;" class="validation-status">
+        <div class="validation-icon"></div>
+        <p class="validation-message"></p>
+    </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div style="display: flex; align-items: center;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Uploading and processing your CSV file...</div>
+    </div>
+</div>
+
+<div class="result-section">
+    <div id="ml-form" class="model-config" style="display: none;">
+        <h3>Configure Your Model</h3>
+        <form id="ml-config">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="target-column">Target Column</label>
+                    <select id="target-column" name="target_column" required>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="problem-type">Problem Type</label>
+                    <select id="problem-type" name="problem_type" required>
+                        <option value="classification">Classification</option>
+                        <option value="regression">Regression</option>
+                    </select>
+                </div>
+                <button type="submit" id="build-model-btn">Build Model</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#drop-zone').on('click', function() {
+            $('#file-input').click();
+        });
+
+        $('#file-input').on('change', function(event) {
+            var files = event.target.files;
+            if (files.length) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        $('#ml-config').on('submit', function(event) {
+            event.preventDefault();
+            // Handle model building
+        });
+    });
+
+    function handleFileUpload(file) {
+        // Handle file upload logic
+    }
+</script>
+{% endblock %}

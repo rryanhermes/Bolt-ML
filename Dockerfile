@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Make the startup script executable
+RUN chmod +x build.sh
 
-# Run gunicorn
-CMD exec gunicorn --bind :$PORT myproject.wsgi:application 
+# Use the startup script as the entrypoint
+CMD ["./build.sh"] 

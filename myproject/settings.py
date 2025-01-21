@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%^1+igvw@05p2gc3d#h#pvvlo&n2xm')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('GAE_APPLICATION', None) is None  # False in production, True in local
 
 ALLOWED_HOSTS = [
     'personal-website-395618.appspot.com',
@@ -52,18 +52,25 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'myapp'
+    'myapp',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://bolt-ml.com",
+    "https://www.bolt-ml.com",
 ]
 
 ROOT_URLCONF = "myproject.urls"
@@ -93,12 +100,20 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 if os.environ.get('DATABASE_URL'):
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=True
-        )
+        'default': {
+            **dj_database_url.config(
+                default=os.environ.get('DATABASE_URL'),
+                conn_max_age=0,  # Don't keep connections alive with pgbouncer
+                conn_health_checks=True,
+                ssl_require=True,
+            ),
+            'OPTIONS': {
+                'sslmode': 'require',
+                'application_name': 'django',
+                'options': '-c statement_timeout=30000',  # 30 seconds timeout
+            },
+            'DISABLE_SERVER_SIDE_CURSORS': True,  # Required for pgbouncer
+        }
     }
 else:
     DATABASES = {
@@ -202,12 +217,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Ensure DEBUG is False in production
-DEBUG = False if os.environ.get('RENDER') else True
-
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Handled by App Engine
+    SECURE_SSL_REDIRECT = True  # Handled by App Engine
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
@@ -229,8 +241,8 @@ if not DEBUG:
     CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
 else:
     # Development settings
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [
         'https://personal-website-395618.uc.r.appspot.com',
         'https://personal-website-395618.appspot.com',
@@ -244,6 +256,7 @@ CSRF_USE_SESSIONS = False  # Use cookie-based tokens
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie
 CSRF_COOKIE_DOMAIN = None
 CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_NAME = 'csrftoken'  # Default Django CSRF cookie name
 
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
@@ -259,3 +272,24 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 # Google Analytics
 GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', '')
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

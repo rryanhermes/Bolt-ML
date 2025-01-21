@@ -11,6 +11,7 @@ env_variables:
   USE_X_FORWARDED_HOST: 'True'
   USE_X_FORWARDED_PORT: 'True'
   GA_TRACKING_ID: 'G-P488NT9NQC'
+  DATABASE_URL: 'postgresql://postgres.fcyudwcpuofaqukydpnd:Longasspassword22374!@aws-0-us-west-1.pooler.supabase.com:6543/postgres'
 
 handlers:
 - url: /static

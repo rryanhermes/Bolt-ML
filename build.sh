@@ -1,21 +1,13 @@
-#!/usr/bin/env bash
-# exit on error
-set -o errexit
+#!/bin/bash
 
-echo "Installing dependencies..."
-pip install -r requirements.txt
+# Wait for the database to be ready
+echo "Waiting for database..."
+sleep 10
 
-echo "Running migrations for auth and contenttypes..."
-python manage.py migrate auth
-python manage.py migrate contenttypes
-
-echo "Running all other migrations..."
+# Apply database migrations
+echo "Applying database migrations..."
 python manage.py migrate
 
-echo "Collecting static files..."
-python manage.py collectstatic --no-input --clear
-
-echo "Creating superuser..."
-DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD} python manage.py createsuperuser --noinput \
-    --username ${DJANGO_SUPERUSER_USERNAME} \
-    --email ${DJANGO_SUPERUSER_EMAIL} || true 
+# Start Gunicorn
+echo "Starting Gunicorn..."
+exec gunicorn --bind :$PORT myproject.wsgi:application 

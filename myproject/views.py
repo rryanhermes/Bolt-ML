@@ -214,7 +214,7 @@ def index(request):
 def testing(request):
     return render(request, 'testing.html')
 
-@csrf_exempt
+@csrf_protect
 def build_model(request):
     if request.method == 'POST':
         try:
