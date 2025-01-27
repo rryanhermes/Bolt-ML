@@ -103,3 +103,4 @@ whitenoise==6.6.0
 wsproto==1.2.0
 xlwings==0.33.5
 yarg==0.1.9
+psycopg2-binary==2.9.9
