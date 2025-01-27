@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%^1+igvw@05p2gc3d#h#pvvlo&n2xm')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('GAE_APPLICATION', None) is None  # False in production, True in local
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'personal-website-395618.appspot.com',
@@ -37,7 +37,9 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'bolt-ml.com',
-    'www.bolt-ml.com'
+    'www.bolt-ml.com',
+    'morning-hollows-93061.herokuapp.com',
+    '.herokuapp.com'
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
@@ -235,7 +237,8 @@ if not DEBUG:
         'https://personal-website-395618.appspot.com',
         'http://127.0.0.1:8000',
         'https://bolt-ml.com',
-        'https://www.bolt-ml.com'
+        'https://www.bolt-ml.com',
+        'https://morning-hollows-93061.herokuapp.com'
     ]
     CSRF_COOKIE_DOMAIN = None  # Let Django handle this automatically
     CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
@@ -248,7 +251,8 @@ else:
         'https://personal-website-395618.appspot.com',
         'http://127.0.0.1:8000',
         'https://bolt-ml.com',
-        'https://www.bolt-ml.com'
+        'https://www.bolt-ml.com',
+        'https://morning-hollows-93061.herokuapp.com'
     ]
 
 # CSRF settings that apply to both development and production
