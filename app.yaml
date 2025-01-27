@@ -27,30 +27,13 @@ handlers:
   secure: always
 
 resources:
-  cpu: 2
-  memory_gb: 2.0
-  disk_size_gb: 20
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
 
 automatic_scaling:
-  target_cpu_utilization: 0.65
-  min_num_instances: 2
-  max_num_instances: 10
+  min_num_instances: 1
+  max_num_instances: 2
   cool_down_period_sec: 180
   cpu_utilization:
     target_utilization: 0.65
-    
-readiness_check:
-  app_start_timeout_sec: 300
-  check_interval_sec: 5
-  timeout_sec: 4
-  failure_threshold: 2
-  success_threshold: 2
-  
-liveness_check:
-  check_interval_sec: 30
-  timeout_sec: 4
-  failure_threshold: 2
-  success_threshold: 2
-
-network:
-  session_affinity: true
