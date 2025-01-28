@@ -102,8 +102,6 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 if os.environ.get('DATABASE_URL'):
     db_url = os.environ.get('DATABASE_URL')
-    # Replace db.fcyudwcpuofaqukydpnd with db.fcyudwcpuofaqukydpnd-pooler
-    db_url = db_url.replace('db.fcyudwcpuofaqukydpnd', 'db.fcyudwcpuofaqukydpnd-pooler')
     print(f"Found DATABASE_URL: {db_url.split('@')[0]}@[HIDDEN]")
     
     try:
@@ -111,10 +109,10 @@ if os.environ.get('DATABASE_URL'):
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
                 'NAME': 'postgres',
-                'USER': 'postgres',
+                'USER': 'postgres.fcyudwcpuofaqukydpnd',  # Note: postgres.[project-ref]
                 'PASSWORD': 'Longasspassword22374!',
-                'HOST': 'db.fcyudwcpuofaqukydpnd-pooler.supabase.co',  # Note the -pooler suffix
-                'PORT': '5432',
+                'HOST': 'aws-0-us-west-1.pooler.supabase.com',  # From your session pooler settings
+                'PORT': '5432',  # Session pooler uses standard port 5432
                 'OPTIONS': {
                     'sslmode': 'require'
                 }
