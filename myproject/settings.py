@@ -32,14 +32,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    'personal-website-395618.appspot.com',
-    'personal-website-395618.uc.r.appspot.com',
-    'localhost',
-    '127.0.0.1',
+    'morning-hollows-93061-e4d13777b43a.herokuapp.com',
     'bolt-ml.com',
-    'www.bolt-ml.com',
-    'morning-hollows-93061.herokuapp.com',
-    '.herokuapp.com'
+    'www.bolt-ml.com'
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
