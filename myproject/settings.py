@@ -114,6 +114,10 @@ if os.environ.get('DATABASE_URL'):
             }
         }
     }
+    # Print debug info about database connection
+    db_config = DATABASES['default'].copy()
+    db_config.pop('PASSWORD', None)  # Don't log the password
+    print(f"Database config: {db_config}")
 else:
     DATABASES = {
         'default': {
