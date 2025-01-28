@@ -34,7 +34,8 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [
     'morning-hollows-93061-e4d13777b43a.herokuapp.com',
     'bolt-ml.com',
-    'www.bolt-ml.com'
+    'www.bolt-ml.com',
+    '127.0.0.1',
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
