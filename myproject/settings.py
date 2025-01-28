@@ -225,24 +225,16 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True  # Handled by App Engine
+    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    USE_X_FORWARDED_HOST = True
-    USE_X_FORWARDED_PORT = True
     CSRF_TRUSTED_ORIGINS = [
-        'https://personal-website-395618.uc.r.appspot.com',
-        'https://personal-website-395618.appspot.com',
-        'http://127.0.0.1:8000',
-        'https://bolt-ml.com',
-        'https://www.bolt-ml.com',
-        'https://morning-hollows-93061.herokuapp.com'
+        "https://bolt-ml.com",
+        "https://www.bolt-ml.com",
     ]
     CSRF_COOKIE_DOMAIN = None  # Let Django handle this automatically
     CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
@@ -251,12 +243,8 @@ else:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [
-        'https://personal-website-395618.uc.r.appspot.com',
-        'https://personal-website-395618.appspot.com',
-        'http://127.0.0.1:8000',
-        'https://bolt-ml.com',
-        'https://www.bolt-ml.com',
-        'https://morning-hollows-93061.herokuapp.com'
+        "https://bolt-ml.com",
+        "https://www.bolt-ml.com",
     ]
 
 # CSRF settings that apply to both development and production
