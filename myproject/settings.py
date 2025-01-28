@@ -115,7 +115,8 @@ if os.environ.get('DATABASE_URL'):
                 'OPTIONS': {
                     'sslmode': 'require',
                     'target_session_attrs': 'read-write',
-                    'hostaddr': '34.194.248.1'  # Force IPv4
+                    'gssencmode': 'disable',  # Force simpler authentication
+                    'options': '-c AddressFamily=ipv4'  # Force IPv4
                 }
             }
         }
