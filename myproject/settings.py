@@ -104,17 +104,14 @@ if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': {
             **dj_database_url.config(
-                default=os.environ.get('DATABASE_URL'),
-                conn_max_age=0,  # Don't keep connections alive with pgbouncer
+                conn_max_age=600,
                 conn_health_checks=True,
                 ssl_require=True,
             ),
             'OPTIONS': {
                 'sslmode': 'require',
-                'application_name': 'django',
-                'options': '-c statement_timeout=30000',  # 30 seconds timeout
-            },
-            'DISABLE_SERVER_SIDE_CURSORS': True,  # Required for pgbouncer
+                'options': '-c statement_timeout=30000'
+            }
         }
     }
 else:
@@ -173,13 +170,13 @@ SESSION_COOKIE_HTTPONLY = True  # Prevents JavaScript access to session cookie
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session alive after closing browser
 SESSION_COOKIE_SECURE = False  # Set True if using HTTPS
 
+# Add detailed database logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
         },
     },
     'loggers': {
@@ -188,10 +185,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'django': {
+        'django.request': {
             'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
