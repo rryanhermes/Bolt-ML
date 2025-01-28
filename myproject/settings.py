@@ -101,24 +101,31 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 if os.environ.get('DATABASE_URL'):
-    DATABASES = {
-        'default': {
-            **dj_database_url.config(
-                conn_max_age=600,
-                conn_health_checks=True,
-                ssl_require=True,
-            ),
-            'OPTIONS': {
-                'sslmode': 'require',
-                'options': '-c statement_timeout=30000'
+    db_url = os.environ.get('DATABASE_URL')
+    print(f"Found DATABASE_URL: {db_url.split('@')[0]}@[HIDDEN]")
+    
+    try:
+        DATABASES = {
+            'default': {
+                **dj_database_url.config(
+                    default=db_url,
+                    conn_max_age=600,
+                    conn_health_checks=True,
+                ),
+                'OPTIONS': {
+                    'sslmode': 'require',
+                }
             }
         }
-    }
-    # Print debug info about database connection
-    db_config = DATABASES['default'].copy()
-    db_config.pop('PASSWORD', None)  # Don't log the password
-    print(f"Database config: {db_config}")
+        print("Database engine:", DATABASES['default'].get('ENGINE'))
+        print("Database name:", DATABASES['default'].get('NAME'))
+        print("Database host:", DATABASES['default'].get('HOST'))
+        
+    except Exception as e:
+        print(f"Error configuring database: {str(e)}")
+        raise
 else:
+    print("WARNING: No DATABASE_URL found in environment, using SQLite!")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -298,3 +305,9 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # Changed from IsAuthenticated to AllowAny
+    ],
+}
