@@ -106,6 +106,8 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 if os.environ.get('DATABASE_URL'):
     db_url = os.environ.get('DATABASE_URL')
+    # Remove pool_timeout from the URL
+    db_url = db_url.split('?')[0] + '?sslmode=require'
     print(f"Found DATABASE_URL: {db_url.split('@')[0]}@[HIDDEN]")
     
     try:
@@ -123,7 +125,7 @@ if os.environ.get('DATABASE_URL'):
                     'sslmode': 'require',
                     'connect_timeout': 30,
                 },
-                'CONN_MAX_AGE': 0,  # Disable persistent connections for pooling
+                'CONN_MAX_AGE': 0,
             }
         }
         print("Database connection info:")
