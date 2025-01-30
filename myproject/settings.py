@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     'bolt-ml.com',
     'www.bolt-ml.com',
     '127.0.0.1',
+    '127.0.0.1:8000',
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
@@ -71,6 +72,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.bolt-ml.com",
 ]
 
+if DEBUG:
+    CORS_ALLOWED_ORIGINS += [
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1",
+    ]
+
 ROOT_URLCONF = "myproject.urls"
 
 TEMPLATES = [
@@ -105,10 +112,10 @@ if os.environ.get('DATABASE_URL'):
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
                 'NAME': 'postgres',
-                'USER': 'postgres.fcyudwcpuofaqukydpnd',  # Note: postgres.[project-ref]
+                'USER': 'postgres.fcyudwcpuofaqukydpnd',
                 'PASSWORD': 'Longasspassword22374!',
-                'HOST': 'aws-0-us-west-1.pooler.supabase.com',  # From your session pooler settings
-                'PORT': '5432',  # Session pooler uses standard port 5432
+                'HOST': 'aws-0-us-west-1.pooler.supabase.com',
+                'PORT': '6543',
                 'OPTIONS': {
                     'sslmode': 'require'
                 }
@@ -226,27 +233,39 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Security settings for production
 if not DEBUG:
+    # Force HTTPS
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # HSTS settings
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    CSRF_TRUSTED_ORIGINS = [
-        "https://bolt-ml.com",
-        "https://www.bolt-ml.com",
+    
+    # Additional security settings
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Update ALLOWED_HOSTS for Heroku
+    ALLOWED_HOSTS = [
+        'bolt-ml.com',
+        'www.bolt-ml.com',
+        'your-heroku-app-name.herokuapp.com',  # Replace with your actual Heroku app name
     ]
-    CSRF_COOKIE_DOMAIN = None  # Let Django handle this automatically
-    CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
+    
+    # Update CSRF settings for Heroku
+    CSRF_TRUSTED_ORIGINS = [
+        'https://bolt-ml.com',
+        'https://www.bolt-ml.com',
+        'https://your-heroku-app-name.herokuapp.com',  # Replace with your actual Heroku app name
+    ]
 else:
-    # Development settings
-    CSRF_COOKIE_SECURE = True
+    # Even in debug, maintain some security
     SESSION_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = [
-        "https://bolt-ml.com",
-        "https://www.bolt-ml.com",
-    ]
+    CSRF_COOKIE_SECURE = True
 
 # CSRF settings that apply to both development and production
 CSRF_USE_SESSIONS = False  # Use cookie-based tokens

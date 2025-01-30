@@ -1,0 +1,13 @@
+- Change site security so that Chrome recognizes bolt as secure 
+- Get bolt-ml.com url to work
+- Remove premium tier
+- Remove model saving functionality
+- Fix modeling backend
+- Change color scheme to x + lightwhite (and logo + favicon)
+- Password reset
+- Website footers
+- Code sample showing how to use model in own Code
+- API?
+- Model testing within website?
+- Clean home page
+- Advanced modeling optomization
