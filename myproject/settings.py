@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
+import urllib.parse
 
 # Load environment variables from .env file
 load_dotenv()
@@ -114,11 +115,18 @@ if os.environ.get('DATABASE_URL'):
                 'NAME': 'postgres',
                 'USER': 'postgres.fcyudwcpuofaqukydpnd',
                 'PASSWORD': 'Longasspassword22374!',
-                'HOST': 'aws-0-us-west-1.pooler.supabase.com',  # Changed to pooler host
-                'PORT': '6543',  # Changed to pooler port
+                'HOST': 'aws-0-us-west-1.pooler.supabase.com',
+                'PORT': '6543',
                 'OPTIONS': {
-                    'sslmode': 'require'
-                }
+                    'sslmode': 'require',
+                    'connect_timeout': 5,
+                    'keepalives': 1,
+                    'keepalives_idle': 30,
+                    'keepalives_interval': 10,
+                    'keepalives_count': 5,
+                },
+                'CONN_MAX_AGE': 0,  # Disable persistent connections
+                'ATOMIC_REQUESTS': False,
             }
         }
         print("Database connection info:")
@@ -142,6 +150,13 @@ else:
         }
     }
 
+# Add this after your DATABASE configuration
+if os.environ.get('QUOTAGUARDSTATIC_URL'):
+    quotaguard_url = urllib.parse.urlparse(os.environ.get('QUOTAGUARDSTATIC_URL'))
+    os.environ['PGHOST'] = quotaguard_url.hostname
+    os.environ['PGPORT'] = str(quotaguard_url.port or '')
+    os.environ['PGUSER'] = quotaguard_url.username
+    os.environ['PGPASSWORD'] = quotaguard_url.password
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
