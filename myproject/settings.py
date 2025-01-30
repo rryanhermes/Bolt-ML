@@ -114,16 +114,21 @@ if os.environ.get('DATABASE_URL'):
                 'NAME': 'postgres',
                 'USER': 'postgres.fcyudwcpuofaqukydpnd',
                 'PASSWORD': 'Longasspassword22374!',
-                'HOST': 'aws-0-us-west-1.pooler.supabase.com',
-                'PORT': '6543',
+                'HOST': 'aws-0-us-west-1.pooler.supabase.com',  # Changed to pooler host
+                'PORT': '6543',  # Changed to pooler port
                 'OPTIONS': {
                     'sslmode': 'require'
                 }
             }
         }
-        print("Database engine:", DATABASES['default'].get('ENGINE'))
-        print("Database name:", DATABASES['default'].get('NAME'))
-        print("Database host:", DATABASES['default'].get('HOST'))
+        print("Database connection info:")
+        print(f"Host: {DATABASES['default']['HOST']}")
+        print(f"Port: {DATABASES['default']['PORT']}")
+        print(f"User: {DATABASES['default']['USER']}")
+        print(f"Current Heroku IP: ", end='')
+        import subprocess
+        result = subprocess.run(['curl', 'http://ifconfig.me'], capture_output=True, text=True)
+        print(result.stdout)
         
     except Exception as e:
         print(f"Error configuring database: {str(e)}")
@@ -253,14 +258,14 @@ if not DEBUG:
     ALLOWED_HOSTS = [
         'bolt-ml.com',
         'www.bolt-ml.com',
-        'your-heroku-app-name.herokuapp.com',  # Replace with your actual Heroku app name
+        'morning-hollows-93061-e4d13777b43a.herokuapp.com',  # Your actual Heroku app name
     ]
     
     # Update CSRF settings for Heroku
     CSRF_TRUSTED_ORIGINS = [
         'https://bolt-ml.com',
         'https://www.bolt-ml.com',
-        'https://your-heroku-app-name.herokuapp.com',  # Replace with your actual Heroku app name
+        'https://morning-hollows-93061-e4d13777b43a.herokuapp.com',
     ]
 else:
     # Even in debug, maintain some security
