@@ -122,10 +122,8 @@ if os.environ.get('DATABASE_URL'):
                 'OPTIONS': {
                     'sslmode': 'require',
                     'connect_timeout': 30,
-                    'pool_timeout': 30,
-                    'pool_size': 20,
-                    'pool_max': 20,
                 },
+                'CONN_MAX_AGE': 0,  # Disable persistent connections for pooling
             }
         }
         print("Database connection info:")
