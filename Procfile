@@ -1,2 +1,2 @@
-release: quotaguardstatic python manage.py migrate --noinput
-web: quotaguardstatic gunicorn myproject.wsgi
+release: python manage.py migrate
+web: gunicorn myproject.wsgi
