@@ -105,13 +105,11 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 if os.environ.get('DATABASE_URL'):
-    db_url = os.environ.get('DATABASE_URL')
-    # Remove pool_timeout from the URL
-    db_url = db_url.split('?')[0] + '?sslmode=require'
+    db_url = "postgresql://postgres:Longasspassword22374!@db.fcyudwcpuofaqukydpnd.supabase.co:5432/postgres"
     print(f"Found DATABASE_URL: {db_url.split('@')[0]}@[HIDDEN]")
     
     try:
-        # Parse the database URL but override the port
+        # Parse the database URL
         db_config = dj_database_url.parse(db_url)
         DATABASES = {
             'default': {
@@ -120,7 +118,7 @@ if os.environ.get('DATABASE_URL'):
                 'USER': db_config['USER'],
                 'PASSWORD': db_config['PASSWORD'],
                 'HOST': db_config['HOST'],
-                'PORT': '6543',  # Force transaction pooler port
+                'PORT': '5432',  # Direct database port
                 'OPTIONS': {
                     'sslmode': 'require',
                     'connect_timeout': 30,
