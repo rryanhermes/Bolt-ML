@@ -109,24 +109,23 @@ if os.environ.get('DATABASE_URL'):
     print(f"Found DATABASE_URL: {db_url.split('@')[0]}@[HIDDEN]")
     
     try:
+        # Parse the database URL but override the port
+        db_config = dj_database_url.parse(db_url)
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'postgres',
-                'USER': 'postgres.fcyudwcpuofaqukydpnd',
-                'PASSWORD': 'Longasspassword22374!',
-                'HOST': 'aws-0-us-west-1.pooler.supabase.com',
-                'PORT': '6543',
+                'NAME': db_config['NAME'],
+                'USER': db_config['USER'],
+                'PASSWORD': db_config['PASSWORD'],
+                'HOST': db_config['HOST'],
+                'PORT': '6543',  # Force transaction pooler port
                 'OPTIONS': {
                     'sslmode': 'require',
-                    'connect_timeout': 5,
-                    'keepalives': 1,
-                    'keepalives_idle': 30,
-                    'keepalives_interval': 10,
-                    'keepalives_count': 5,
+                    'connect_timeout': 30,
+                    'pool_timeout': 30,
+                    'pool_size': 20,
+                    'pool_max': 20,
                 },
-                'CONN_MAX_AGE': 0,  # Disable persistent connections
-                'ATOMIC_REQUESTS': False,
             }
         }
         print("Database connection info:")
@@ -149,14 +148,6 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
-# Add this after your DATABASE configuration
-if os.environ.get('QUOTAGUARDSTATIC_URL'):
-    quotaguard_url = urllib.parse.urlparse(os.environ.get('QUOTAGUARDSTATIC_URL'))
-    os.environ['PGHOST'] = quotaguard_url.hostname
-    os.environ['PGPORT'] = str(quotaguard_url.port or '')
-    os.environ['PGUSER'] = quotaguard_url.username
-    os.environ['PGPASSWORD'] = quotaguard_url.password
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
