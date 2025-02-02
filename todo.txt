@@ -1,5 +1,4 @@
 - Change site security so that Chrome recognizes bolt as secure 
-- Remove premium tier
 - Remove model saving functionality
 - Fix modeling backend
 - Change color scheme to x + lightwhite (and logo + favicon)

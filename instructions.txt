@@ -1,4 +1,3 @@
-
 Get going:
 
 cd /Users/ryanhermes/Desktop/BIZTECH/myproject
@@ -19,5 +18,3 @@ path('testing/', views.testing, name='testing')
 
 
 python -m myapp.excel_integration
-
-gcloud app deploy

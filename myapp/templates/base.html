@@ -94,6 +94,50 @@
         {% block content %}{% endblock %}
     </main>
 
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>BoltML</h3>
+                <p>Empowering developers with easy-to-use machine learning tools.</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="{% url 'build_model' %}">Build Model</a></li>
+                    <li><a href="{% url 'blog' %}">Blog</a></li>
+                    <li><a href="{% url 'about' %}">About</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="{% url 'about' %}#documentation">Documentation</a></li>
+                    <li><a href="{% url 'about' %}#api">API</a></li>
+                    <li><a href="{% url 'about' %}#faq">FAQ</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="https://github.com/ryanhermes" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                    <li><a href="https://twitter.com/ryanhermes_" target="_blank" rel="noopener noreferrer">Twitter</a></li>
+                    <li><a href="mailto:contact@bolt-ml.com">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} BoltML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="{% url 'about' %}#privacy">Privacy Policy</a>
+                <a href="{% url 'about' %}#terms">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
     {% block extra_js %}{% endblock %}
 
     <script>
@@ -121,7 +165,7 @@
     <script>
       kofiWidgetOverlay.draw('ryanhermes', {
         'type': 'floating-chat',
-        'floating-chat.donateButton.text': 'Support Me',
+        'floating-chat.donateButton.text': 'Support BoltML',
         'floating-chat.donateButton.background-color': '#f45d22',
         'floating-chat.donateButton.text-color': '#fff'
       });
