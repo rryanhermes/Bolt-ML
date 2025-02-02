@@ -71,7 +71,6 @@
                 {% if request.user.is_authenticated %}
                     <li><a href="{% url 'my_models' %}" class="nav-link {% if 'my-models' in request.path %}active{% endif %}">My Models</a></li>
                 {% endif %}
-                <li><a href="{% url 'premium' %}" class="nav-link {% if 'premium' in request.path %}active{% endif %}">Premium</a></li>
                 <li><a href="{% url 'blog' %}" class="nav-link {% if 'blog' in request.path %}active{% endif %}">Blog</a></li>
                 <li><a href="{% url 'about' %}" class="nav-link {% if 'about' in request.path %}active{% endif %}">About</a></li>
                 {% if request.user.is_authenticated %}

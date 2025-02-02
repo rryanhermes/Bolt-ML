@@ -1,5 +1,4 @@
 - Change site security so that Chrome recognizes bolt as secure 
-- Get bolt-ml.com url to work
 - Remove premium tier
 - Remove model saving functionality
 - Fix modeling backend

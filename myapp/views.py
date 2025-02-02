@@ -673,14 +673,6 @@ joblib>=0.17.0"""
         print(f"Error downloading model: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
 
-def premium(request):
-    """
-    View for the premium subscription page.
-    """
-    return render(request, 'premium.html', {
-        'username': request.user.username if request.user.is_authenticated else None
-    })
-
 def blog(request):
     """
     View for the blog page.

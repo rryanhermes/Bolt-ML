@@ -15,7 +15,6 @@ urlpatterns = [
     path('rename-model/<int:model_id>/', views.rename_model, name='rename_model'),
     path('download-model/<int:model_id>/', views.download_model, name='download_model'),
     path('set-timezone/', views.set_timezone, name='set_timezone'),
-    path('premium/', views.premium, name='premium'),
     path('blog/', views.blog, name='blog'),
     path('about/', views.about, name='about'),
     path('newsletter-signup/', views.newsletter_signup, name='newsletter_signup'),

@@ -33,11 +33,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    'morning-hollows-93061-e4d13777b43a.herokuapp.com',
     'bolt-ml.com',
     'www.bolt-ml.com',
-    '127.0.0.1',
-    '127.0.0.1:8000',
+    'morning-hollows-93061-e4d13777b43a.herokuapp.com',
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
@@ -104,37 +102,17 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Heroku database configuration
 if os.environ.get('DATABASE_URL'):
-    db_url = "postgresql://postgres:Longasspassword22374!@db.fcyudwcpuofaqukydpnd.supabase.co:5432/postgres"
-    print(f"Found DATABASE_URL: {db_url.split('@')[0]}@[HIDDEN]")
+    db_url = os.environ.get('DATABASE_URL')
+    # Remove pool_timeout from the URL
+    db_url = db_url.split('?')[0] + '?sslmode=require'
     
     try:
         # Parse the database URL
-        db_config = dj_database_url.parse(db_url)
         DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': db_config['NAME'],
-                'USER': db_config['USER'],
-                'PASSWORD': db_config['PASSWORD'],
-                'HOST': db_config['HOST'],
-                'PORT': '5432',  # Direct database port
-                'OPTIONS': {
-                    'sslmode': 'require',
-                    'connect_timeout': 30,
-                },
-                'CONN_MAX_AGE': 0,
-            }
+            'default': dj_database_url.parse(db_url)
         }
-        print("Database connection info:")
-        print(f"Host: {DATABASES['default']['HOST']}")
-        print(f"Port: {DATABASES['default']['PORT']}")
-        print(f"User: {DATABASES['default']['USER']}")
-        print(f"Current Heroku IP: ", end='')
-        import subprocess
-        result = subprocess.run(['curl', 'http://ifconfig.me'], capture_output=True, text=True)
-        print(result.stdout)
-        
     except Exception as e:
         print(f"Error configuring database: {str(e)}")
         raise
@@ -222,20 +200,12 @@ STATICFILES_DIRS = [
 ]
 
 # Media files (Uploaded files)
-if os.getenv('GAE_APPLICATION', None):
-    # Running on App Engine, use GCS
-    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-    GS_BUCKET_NAME = 'personal-website-395618.appspot.com'
-    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
-    MEDIA_ROOT = ''  # Not used with GCS
-else:
-    # Local development
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    if not os.path.exists(MEDIA_ROOT):
-        os.makedirs(MEDIA_ROOT)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+if not os.path.exists(MEDIA_ROOT):
+    os.makedirs(MEDIA_ROOT)
 
-# Static files configuration
+# Static files configuration for Heroku
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -262,7 +232,7 @@ if not DEBUG:
     ALLOWED_HOSTS = [
         'bolt-ml.com',
         'www.bolt-ml.com',
-        'morning-hollows-93061-e4d13777b43a.herokuapp.com',  # Your actual Heroku app name
+        'morning-hollows-93061-e4d13777b43a.herokuapp.com',
     ]
     
     # Update CSRF settings for Heroku

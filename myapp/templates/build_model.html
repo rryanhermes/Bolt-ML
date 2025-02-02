@@ -189,9 +189,8 @@
         <p class="accuracy-display">Model Accuracy: <span id="model-accuracy" class="accuracy-value"></span></p>
         
         <div class="options-container">
-            {% if not request.user.userprofile.is_premium %}
             <!-- Free Download Option -->
-            <div class="option-card free">
+            <div class="option-card free" style="width: 100%;">
                 <h3>Download Model</h3>
                 <p>Download your trained model and start using it right away.</p>
                 <button id="download-button" class="btn btn-primary">
@@ -200,24 +199,6 @@
                     </svg>
                     Download Model
                 </button>
-            </div>
-            {% endif %}
-            
-            <!-- Premium Option -->
-            <div class="option-card premium" {% if request.user.userprofile.is_premium %}style="width: 100%;"{% endif %}>
-                <div class="premium-badge">PREMIUM</div>
-                <h3>Enhance Performance</h3>
-                <p>Use advanced AI techniques to automatically improve your model's performance.</p>
-                <p>Upgrade to Premium to access enhanced model optimization.</p>
-
-                
-                {% if request.user.userprofile.is_premium %}
-                <button class="enhance-button" onclick="improveModel()">
-                    <span class="button-icon">⚡</span>
-                    Enhance Model
-                </button>
-                {% else %}
-                {% endif %}
             </div>
         </div>
     </div>
@@ -559,24 +540,6 @@
                   `Precision: ${metrics.precision}\n` +
                   `Recall: ${metrics.recall}\n` +
                   `F1 Score: ${metrics.f1}`);
-        }
-
-        function improveModel() {
-            event.preventDefault();
-            const button = event.target;
-            const originalText = button.textContent;
-            
-            button.textContent = 'Enhancing...';
-            button.disabled = true;
-            
-            // For now, show a coming soon message
-            setTimeout(() => {
-                alert('Model enhancement feature coming soon!\n\n' +
-                      'Our AI will analyze your model and apply optimizations to improve its performance.');
-                      
-                button.textContent = originalText;
-                button.disabled = false;
-            }, 1500);
         }
 
         // Sample dataset handling

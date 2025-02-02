@@ -1190,6 +1190,7 @@ select.form-control {
     color: var(--off-white);
     font-size: 0.9rem;
 }
+
 /* Model Options Styles */
 .options-container {
     display: flex;
