@@ -1,7 +1,6 @@
 - Change site security so that Chrome recognizes bolt as secure 
 - Remove model saving functionality
 - Fix modeling backend
-- Change color scheme to x + lightwhite (and logo + favicon)
 - Password reset
 - Website footers
 - Code sample showing how to use model in own Code

@@ -5,62 +5,47 @@
 {% block content %}
 <div class="page-title">About BoltML</div>
 
-<div class="about-container" style="max-width: 800px; margin: 0 auto;">
+<div class="about-container">
     <!-- Mission Section -->
-    <div class="card" style="margin-bottom: 2rem;">
-        <h2 style="color: var(--orange); margin-bottom: 1.5rem;">Our Mission</h2>
-        <p style="color: var(--off-white); line-height: 1.6;">BoltML is dedicated to making machine learning accessible to everyone. We believe that powerful AI tools should be available to individuals and businesses of all sizes, not just large corporations with extensive resources.</p>
+    <div class="card about-card">
+        <h2 class="about-section-title">Our Mission</h2>
+        <p class="about-text">BoltML is dedicated to making machine learning accessible to everyone. We believe that powerful AI tools should be available to individuals and businesses of all sizes, not just large corporations with extensive resources.</p>
         
-        <p style="color: var(--off-white); line-height: 1.6; margin-top: 1rem;">We provide an intuitive platform for building, training, and deploying machine learning models without requiring deep technical expertise. Our automated ML pipeline handles the complexity, allowing you to focus on solving real business problems.</p>
+        <p class="about-text">We provide an intuitive platform for building, training, and deploying machine learning models without requiring deep technical expertise. Our automated ML pipeline handles the complexity, allowing you to focus on solving real business problems.</p>
     </div>
 
     <!-- Team Section -->
-    <div class="card" style="margin-bottom: 2rem;">
-        <h2 style="color: var(--orange); margin-bottom: 1.5rem;">Our Team</h2>
-        <div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
-            <div class="team-member" style="text-align: center;">
-                <div class="member-avatar" style="width: 120px; height: 120px; border-radius: 60px; background: var(--gray-dark); margin: 0 auto 1rem; border: 2px solid var(--orange);"></div>
-                <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Ryan</h3>
-                <p style="color: var(--off-white);">Co-Founder</p>
-            </div>
-            <div class="team-member" style="text-align: center;">
-                <div class="member-avatar" style="width: 120px; height: 120px; border-radius: 60px; background: var(--gray-dark); margin: 0 auto 1rem; border: 2px solid var(--orange);"></div>
-                <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Ziyan</h3>
-                <p style="color: var(--off-white);">Co-Founder</p>
+    <div class="card about-card">
+        <h2 class="about-section-title">Our Team</h2>
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-avatar"></div>
+                <h3 class="team-member-name">Ryan</h3>
+                <p class="team-member-role">Founder</p>
             </div>
         </div>
     </div>
 
     <!-- Contact Section -->
-    <div class="card">
-        <h2 style="color: var(--orange); margin-bottom: 1.5rem;">Contact Us</h2>
-        <div style="display: grid; gap: 1.5rem;">
-            <div class="contact-info" style="display: flex; align-items: center; gap: 1rem;">
-                <div class="contact-icon" style="width: 40px; height: 40px; background: var(--gray-dark); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--orange);">
-                    📧
-                </div>
+    <div class="card about-card">
+        <h2 class="about-section-title">Contact Us</h2>
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-icon">📧</div>
                 <div>
-                    <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Email</h3>
-                    <p style="color: var(--off-white);">support@boltml.com</p>
+                    <h3 class="contact-title">Email</h3>
+                    <p class="contact-detail">support@boltml.com</p>
                 </div>
             </div>
-            <div class="contact-info" style="display: flex; align-items: center; gap: 1rem;">
-                <div class="contact-icon" style="width: 40px; height: 40px; background: var(--gray-dark); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--orange);">
-                    📍
-                </div>
+            <div class="contact-info">
+                <div class="contact-icon">📍</div>
                 <div>
-                    <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Location</h3>
-                    <p style="color: var(--off-white);">Minneapolis, MN</p>
+                    <h3 class="contact-title">Location</h3>
+                    <p class="contact-detail">Minneapolis, MN</p>
                 </div>
             </div>
-            <div class="contact-info" style="display: flex; align-items: center; gap: 1rem;">
-                <div class="contact-icon" style="width: 40px; height: 40px; background: var(--gray-dark); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--orange);">
-                    🕒
-                </div>
-                <div>
-                    <h3 style="color: var(--orange); margin-bottom: 0.5rem;">Support Hours</h3>
-                    <p style="color: var(--off-white);">Monday - Friday, 9AM - 6PM PST</p>
-                </div>
+            <div class="contact-info">
+                <div class="contact-icon">🕒</div>
             </div>
         </div>
     </div>

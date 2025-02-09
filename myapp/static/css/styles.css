@@ -1,16 +1,16 @@
 /* CSS Variables */
 :root {
     /* Brand Colors */
-    --orange: #f38a00;
+    --orange: #ff8400;
     --red: #ef4444;
 
     /* Base Colors */
-    --off-white: #b4b4b4;
+    --off-white: #bbbbbb;
     --actual-white: #ffffff;
-    --white: #e6e6e6;
+    --white: #d7d7d7;
     --black: #000000;
-    --gray-dark: #1a1a1a;
-    --gray-darker: #111111;
+    --gray-dark: #252525;
+    --gray-darker: #0f0f0f;
 }
 
 /* Modern CSS Reset */
@@ -1787,5 +1787,96 @@ select.form-control {
     
     .footer-links {
         justify-content: center;
+    }
+}
+
+/* About Page Styles */
+.about-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-card {
+    margin-bottom: 2rem;
+}
+
+.about-section-title {
+    color: var(--orange);
+    margin-bottom: 1.5rem;
+}
+
+.about-text {
+    color: var(--off-white);
+    line-height: 1.6;
+    margin-top: 1rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.team-member {
+    text-align: center;
+}
+
+.member-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    background: var(--gray-dark);
+    margin: 0 auto 1rem;
+    border: 2px solid var(--orange);
+}
+
+.team-member-name {
+    color: var(--orange);
+    margin-bottom: 0.5rem;
+}
+
+.team-member-role {
+    color: var(--off-white);
+}
+
+.contact-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.contact-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--gray-dark);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--orange);
+}
+
+.contact-title {
+    color: var(--orange);
+    margin-bottom: 0.5rem;
+}
+
+.contact-detail {
+    color: var(--off-white);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .about-container {
+        padding: 0 1rem;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
     }
 }

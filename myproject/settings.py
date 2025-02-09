@@ -30,12 +30,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-k+@_-pluc&+i5+2y#^0j%^1+igvw@05p2gc3d#h#pvvlo&n2xm')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'  # Default to True for development
 
 ALLOWED_HOSTS = [
     'bolt-ml.com',
     'www.bolt-ml.com',
     'morning-hollows-93061-e4d13777b43a.herokuapp.com',
+    '127.0.0.1',
+    'localhost',
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use database-backed sessions
@@ -294,3 +296,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',  # Changed from IsAuthenticated to AllowAny
     ],
 }
+
+# For development, you might want to disable some security settings
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
